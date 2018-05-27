@@ -1,90 +1,80 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
-#include <map>
-using std::map;
 class MaxK_List;
 
 // -----------------------------------------------------------------------------
-// global functions
+//  struct Result
 // -----------------------------------------------------------------------------
-void error(							// an error message
-	char* msg,							// an message
-	bool is_exit);						// whether exit the program
+struct Result {						// structure for furthest neighbor / hash value
+	float key_;							// distance / random projection value
+	int   id_;							// object id
+};
+
+// -----------------------------------------------------------------------------
+int ResultComp(						// compare function for qsort (ascending)
+	const void *e1,						// 1st element
+	const void *e2);					// 2nd element
+
+// -----------------------------------------------------------------------------
+int ResultCompDesc(					// compare function for qsort (descending)
+	const void *e1,						// 1st element
+	const void *e2);					// 2nd element
+
+// -----------------------------------------------------------------------------
+//  uitlity functions
+// -----------------------------------------------------------------------------
+void create_dir(					// create dir if the path exists
+	char *path);						// input path
 
 // -----------------------------------------------------------------------------
 int read_data(						// read data set from disk
-	int n,								// number of data points
-	int d,								// dimensionality
-	char* fname,						// address of data
-	float** data);						// data (return)
+	int   n,							// number of data points
+	int   d,							// dimensionality
+	const char *fname,					// address of data
+	float **data);						// data (return)
 
 // -----------------------------------------------------------------------------
-int check_path(						// check input path whether exist
-	char* path);						// input path
-
-// -----------------------------------------------------------------------------
-float uniform(						// r.v. from Uniform(min, max)
-	float min,							// min value
-	float max);							// max value
-
-// -----------------------------------------------------------------------------
-float gaussian(						// r.v. from Gaussian(mean, sigma)
-	float mean,							// mean value
-	float sigma);						// std value
-
-// -----------------------------------------------------------------------------
-float normal_pdf(					// pdf of Guassian(mean, std)
-	float x,							// variable
-	float u,							// mean
-	float sigma);						// standard error
-
-// -----------------------------------------------------------------------------
-float normal_cdf(					// cdf of N(0, 1) in (-inf, x]
-	float x,							// integral border
-	float step = 0.001f);				// step increment
-
-// -----------------------------------------------------------------------------
-float new_cdf(						// cdf of N(0, 1) in [-x, x]
-	float x,							// integral border
-	float step = 0.001f);				// step increment
+int read_ground_truth(				// read ground truth results from disk
+	int    qn,							// number of query objects
+	const  char *fname,					// address of truth set
+	Result **R);						// ground truth results (return)
 
 // -----------------------------------------------------------------------------
 float calc_inner_product(			// calc inner product
-	float* p1,							// 1st point
-	float* p2,							// 2nd point
-	int dim);							// dimension
-
+	int   dim,							// dimension
+	const float *p1,					// 1st point
+	const float *p2);					// 2nd point
+	
 // -----------------------------------------------------------------------------
 float calc_l2_sqr(					// calc L2 square distance
-	float* p1,							// 1st point
-	float* p2,							// 2nd point
-	int dim);							// dimension
+	int   dim,							// dimension
+	const float *p1,					// 1st point
+	const float *p2);					// 2nd point
 
 // -----------------------------------------------------------------------------
 float calc_l2_dist(					// calc L2 distance
-	float* p1,							// 1st point
-	float* p2,							// 2nd point
-	int dim);							// dimension
+	int   dim,							// dimension
+	const float *p1,					// 1st point
+	const float *p2);					// 2nd point
 
 // -----------------------------------------------------------------------------
 float calc_l1_dist(					// calc L1 distance
-	float* p1,							// 1st point
-	float* p2,							// 2nd point
-	int dim);							// dimension
+	int   dim,							// dimension
+	const float *p1,					// 1st point
+	const float *p2);					// 2nd point
 
 // -----------------------------------------------------------------------------
-float calc_recall(					// calc recall between two ID list
-	int n,								// length of ID list
-	MaxK_List* list,					// ID list of k-nn method
-	map<int, int>& id_rank);			// ground truth ID list
+float calc_recall(					// calc recall (percentage)
+	int   k,							// top-k value
+	const Result *R,					// ground truth results 
+	MaxK_List *list);					// results returned by algorithms
 
 // -----------------------------------------------------------------------------
 int get_hits(						// get the number of hits between two ID list
-	int k,								// length of ID list
-	int t,								// top-t
-	MaxK_List* list,					// ID list of k-nn method
-	map<int, int>& id_rank);			// ground truth ID list
+	int   k,							// top-k value
+	int   t,							// top-t value
+	const Result *R,					// ground truth results 
+	MaxK_List *list);					// results returned by algorithms
 
-
-#endif
+#endif // __UTIL_H

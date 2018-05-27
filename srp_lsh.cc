@@ -1,29 +1,39 @@
 #include "headers.h"
 
-
 // -----------------------------------------------------------------------------
-SRP_LSH::SRP_LSH()					// constructor
+SRP_LSH::SRP_LSH(					// constructor
+	int n,								// cardinality of dataset
+	int d,								// dimensionality of dataset
+	int K,								// number of hash tables
+	const float **data)					// data objects
 {
-	K_ = -1;
-	dim_ = -1;
-	n_pts_ = -1;
+	// -------------------------------------------------------------------------
+	//  init parameters
+	// -------------------------------------------------------------------------
+	n_pts_ = n;
+	dim_   = d;
+	K_     = K;
+	data_  = data;
 
-	proj_ = NULL;
-	hash_code_ = NULL;
+	// -------------------------------------------------------------------------
+	//  build hash tables (bulkloading)
+	// -------------------------------------------------------------------------
+	gen_random_vectors();
+	bulkload();
 }
 
 // -----------------------------------------------------------------------------
 SRP_LSH::~SRP_LSH()					// destructor
 {
 	if (proj_ != NULL) {
-		for (int i = 0; i < K_; i++) {
+		for (int i = 0; i < K_; ++i) {
 			delete[] proj_[i];	proj_[i] = NULL;
 		}
 		delete[] proj_;	proj_ = NULL;
 	}
 
 	if (hash_code_ != NULL) {
-		for (int i = 0; i < n_pts_; i++) {
+		for (int i = 0; i < n_pts_; ++i) {
 			delete[] hash_code_[i];	hash_code_[i] = NULL;
 		}
 		delete[] hash_code_; hash_code_ = NULL;
@@ -31,80 +41,54 @@ SRP_LSH::~SRP_LSH()					// destructor
 }
 
 // -----------------------------------------------------------------------------
-void SRP_LSH::init(					// initialize the parameters
-	int K,								// number of hash tables
-	int d,								// dimensionality of dataset
-	int n,								// cardinality of dataset
-	float** data)						// input data objects
-{
-	n_pts_ = n;
-	K_ = K;
-	dim_ = d;
-	data_ = data;
-
-	pre_processing();
-}
-
-// -----------------------------------------------------------------------------
-void SRP_LSH::pre_processing()		// pre-processing of data
-{
-	generate();
-
-	hash_code_ = new bool*[n_pts_];
-	for (int i = 0; i < n_pts_; i++) {
-		hash_code_[i] = new bool[K_];
-		get_projection_vector(data_[i], hash_code_[i]);
-	}
-}
-
-// -----------------------------------------------------------------------------
-void SRP_LSH::generate()			// generate random projection vectors
+void SRP_LSH::gen_random_vectors()	// generate random projection vectors
 {
 	proj_ = new float*[K_];
-	for (int k = 0; k < K_; k++) {
-		proj_[k] = new float[dim_];
-		for (int d = 0; d < dim_; d++) {
-			proj_[k][d] = gaussian(0.0f, 1.0f);
+	for (int i = 0; i < K_; ++i) {
+		proj_[i] = new float[dim_];
+		for (int j = 0; j < dim_; ++j) {
+			proj_[i][j] = gaussian(0.0f, 1.0f);
 		}
 	}
 }
 
 // -----------------------------------------------------------------------------
-void SRP_LSH::get_projection_vector(// get vector after random projection
-	float* data,						// input data 
-	bool* hash_code)					// hash code of input data (return)
+void SRP_LSH::bulkload()			// bulkloading
 {
-	for (int k = 0; k < K_; k++) {
-		float sum = 0.0f;
-		for (int d = 0; d < dim_; d++) {
-			sum += proj_[k][d] * data[d];
-		}
-		if (sum >= 0) {
-			hash_code[k] = true;
-		}
-		else {
-			hash_code[k] = false;
-		}
+	hash_code_ = new bool*[n_pts_];
+	for (int i = 0; i < n_pts_; ++i) {
+		hash_code_[i] = new bool[K_];
+		get_proj_vector(data_[i], hash_code_[i]);
 	}
 }
 
 // -----------------------------------------------------------------------------
-int SRP_LSH::kmc(					// top-k approximate maximum cosine search
-	float* query,						// input query
-	int top_k,							// top-k value
-	MaxK_List* list)					// top-k mip results
+void SRP_LSH::get_proj_vector(		// get vector after random projection
+	const float *data,					// input data 
+	bool *hash_code)					// hash code of input data (return)
 {
-	bool* mc_query = new bool[K_];
-	get_projection_vector(query, mc_query);
+	for (int i = 0; i < K_; ++i) {
+		float sum = calc_inner_product(dim_, proj_[i], data);
 
-	for (int i = 0; i < n_pts_; i++) {
+		if (sum >= 0) hash_code[i] = true;
+		else hash_code[i] = false;
+	}
+}
+
+// -----------------------------------------------------------------------------
+int SRP_LSH::kmc(					// c-k-AMC search
+	int   top_k,						// top-k value
+	const float *query,					// input query
+	MaxK_List *list)					// top-k MC results (return)
+{
+	bool *mc_query = new bool[K_];
+	get_proj_vector(query, mc_query);
+
+	for (int i = 0; i < n_pts_; ++i) {
 		int match = 0;
-		for (int k = 0; k < K_; k++) {
-			if (hash_code_[i][k] == mc_query[k]) {
-				match++;
-			}
+		for (int j = 0; j < K_; ++j) {
+			if (hash_code_[i][j] == mc_query[j]) ++match;
 		}
-		//cout << i << " " << dist << endl;
 		list->insert(match, i);
 	}
 

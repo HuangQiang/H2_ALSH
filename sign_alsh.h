@@ -3,52 +3,55 @@
 
 class SRP_LSH;
 
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//  Sign-LSH is used to solve the problem of c-Approximate Maximum Inner 
+//  Product (c-AMIP) search
+//
+//  the idea was introduced by Anshumali Shrivastava and Ping Li in their paper 
+//  "Improved asymmetric locality sensitive hashing (ALSH) for Maximum Inner 
+//  Product Search (MIPS)", In Proceedings of the Thirty-First Conference on 
+//  Uncertainty in Artificial Intelligence (UAI), pages 812–821, 2015.
+// -----------------------------------------------------------------------------
 class Sign_ALSH {
 public:
-	Sign_ALSH();					// constructor
+	Sign_ALSH();					// default constructor
 	~Sign_ALSH();					// destrcutor
 
 	// -------------------------------------------------------------------------
-	void init(						// init the parameters
-		int n,							// number of data
-		int d,							// dimension of data
-		int K,							// number of hash tables
-		int m,							// additional dimension of data
+	void build(						// build index
+		int   n,						// number of data objects
+		int   d,						// dimension of data objects
+		int   K,						// number of hash tables
+		int   m,						// additional dimension of data
 		float U,						// scale factor for data
-		float ratio,					// approximation ratio
-		float** data);					// input data
+		float ratio,					// approximation ratio for AMC search
+		const float** data);	 		// data objects
 
 	// -------------------------------------------------------------------------
-	int kmip(						// top-k approximate mip search
-		float* query,					// input query
-		int top_k,						// top-k value
+	int kmip(						// c-k-AMIP search
+		int   top_k,					// top-k value
+		const float* query,				// input query
 		MaxK_List* list);				// top-k mip results
 
-private:
+protected:
 	int   n_pts_;					// number of data points
 	int   dim_;						// dimension of data
 	int   K_;						// number of hash tables
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
 	float appr_ratio_;				// approximation ratio
-	float **data_;					// original data objects
+	const float **data_;			// data objects
 
-	float M_;						// max norm of original data objects
+	float M_;						// max norm of data objects
 	int   sign_alsh_dim_;			// dimension of sign_alsh data
 	float **sign_alsh_data_;		// sign_alsh data
-	
 	SRP_LSH *lsh_;					// SRP_LSH
 
 	// -------------------------------------------------------------------------
-	int pre_processing();			// pre-processing of data
+	int bulkload();					// bulkloading
 
 	// -------------------------------------------------------------------------
-	void display_params();			// display parameters
-
-	// -------------------------------------------------------------------------
-	int indexing();					// indexing the new data
-
+	void display();					// display parameters
 };
 
-#endif
+#endif // __SIGN_ALSH_H

@@ -3,49 +3,51 @@
 
 class SRP_LSH;
 
-
+// -----------------------------------------------------------------------------
+//  Simple-LSH is used to solve the problem of c-Approximate Maximum Inner 
+//  Product (c-AMIP) search.
+//
+//  the idea was introduced by Behnam Neyshabur and Nathan Srebro in their 
+//  paper "On Symmetric and Asymmetric LSHs for Inner Product Search", In 
+//  Proceedings of the 32nd International Conference on International Conference 
+//  on Machine Learning (ICML), pages 1926–1934, 2015.
 // -----------------------------------------------------------------------------
 class Simple_LSH {
 public:
-	Simple_LSH();					// constructor
+	Simple_LSH();					// defaut constructor
 	~Simple_LSH();					// destructor
 
 	// -------------------------------------------------------------------------
-	void init(						// init the parameters
-		int n,							// number of data
-		int d,							// dimension of data
-		int K,							// number of hash tables
+	void build(						// build index
+		int   n,						// number of data
+		int   d,						// dimension of data
+		int   K,						// number of hash tables
 		float ratio,					// approximation ratio
-		float** data);					// input data
+		const float** data);			// data objects
 
 	// -------------------------------------------------------------------------
-	int kmip(						// top-k approximate mip search
-		float* query,					// input query
-		int top_k,						// top-k value
+	int kmip(						// c-k-AMIP search
+		int   top_k,					// top-k value
+		const float* query,				// input query
 		MaxK_List* list);				// top-k mip results
 
-private:
+protected:
 	int   n_pts_;					// number of data points
 	int   dim_;						// dimension of data
 	int   K_;						// number of hash tables
-	float appr_ratio_;				// approximation ratio
-	float **data_;					// original data objects
+	float appr_ratio_;				// approximation ratio for AMC search
+	const float **data_;			// data objects
 	
-	float M_;						// max norm of original data objects
+	float M_;						// max norm of data objects
 	int   simple_lsh_dim_;			// dimension of simple_lsh data
 	float **simple_lsh_data_;		// simple_lsh data
-	
 	SRP_LSH *lsh_;					// SRP_LSH
 
 	// -------------------------------------------------------------------------
-	int pre_processing();			// pre-processing of data
+	int bulkload();					// bulkloading
 
 	// -------------------------------------------------------------------------
-	void display_params();			// display parameters
-
-	// -------------------------------------------------------------------------
-	int indexing();					// indexing the new data
-
+	void display();					// display parameters
 };
 
-#endif
+#endif // __SIMPLE_LSH_H

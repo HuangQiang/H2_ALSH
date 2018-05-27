@@ -14,26 +14,25 @@
 // -----------------------------------------------------------------------------
 //  Constants
 // -----------------------------------------------------------------------------
-const float E  = 2.71828182845904F;	// math constants
-const float PI = 3.14159265358979F;
-									// max real value
-const float MAXREAL = 3.402823466e+38F;
-const float MINREAL = -MAXREAL;		// min real value
-const float FLOATZERO = 1e-6F;		// accuracy
+const float MAXREAL       = 3.402823466e+38F;
+const float MINREAL       = -MAXREAL;
+const int   MAXINT        = 2147483647;
+const int   MININT        = -MAXINT;
 
-const int MAXINT = 2147483647;		// max integer value
-const int MININT = -MAXINT;			// min integer value
+const int   SIZEBOOL      = (int) sizeof(bool);
+const int   SIZEINT       = (int) sizeof(int);
+const int   SIZECHAR      = (int) sizeof(char);
+const int   SIZEFLOAT     = (int) sizeof(float);
+const int   SIZEDOUBLE    = (int) sizeof(double);
 
-const int MAXK = 10;				// max top-k value
-const int STRING_LEN = 200;			// max length of file name
-const int SCAN_SIZE = 512;			// half size of one scan
-const int CANDIDATES = 100;			// candidate for qalsh
-									// max memory, 8 GB
-const long long MAXMEMORY = 8589934591;
+const float E             = 2.7182818F;
+const float PI            = 3.141592654F;
+const float FLOATZERO     = 1e-6F;
+const float ANGLE         = PI / 8.0f;
 
-const int SIZEINT   = (int) sizeof(int);
-const int SIZECHAR  = (int) sizeof(char);
-const int SIZEFLOAT = (int) sizeof(float);
-const int SIZEBOOL  = (int) sizeof(bool);
+const int   MAXK          = 10;
+const int   SCAN_SIZE     = 512;
+const int   CANDIDATES    = 100;
+const int   MAX_BLOCK_NUM = 5000;
 
-#endif
+#endif // __DEF_H
