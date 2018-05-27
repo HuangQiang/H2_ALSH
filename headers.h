@@ -2,8 +2,8 @@
 //  Authors: Qiang Huang (huangq2011@gmail.com)
 //           Guihong Ma  (maguihong@vip.qq.com)
 //
-//  Created on:       2016-01-02
-//  Last Modified on: 2018-01-06
+//  Release Date: 27-05-2018
+//
 //  Version 1.0.0
 // -----------------------------------------------------------------------------
 
