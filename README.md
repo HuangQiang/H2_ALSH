@@ -27,13 +27,13 @@ run_yahoo.sh, and run_para.sh) for the users who would like to reproduce our
 results presented in SIGKDD 2018. The datasets Sift, Gist, Netflix, and Yahoo 
 we used can be downloaded from the following links:
 
-* Sift: https://drive.google.com/open?id=1Q3_dnblolD9GVis7OakP2mrqmBApytEL
+* Sift: https://drive.google.com/open?id=1dAFbjQWoBIAW30lGzTXaf_w7DxBSUzoN
 
-* Gist: https://drive.google.com/open?id=1M3hJl5slY_pu50IQ7ie-t9E6RvzMizYT
+* Gist: https://drive.google.com/open?id=1r1rsSm6-IdWX2-8eFJkChFfP0Ej7TYM4
 
-* Netflix: https://drive.google.com/open?id=1RF1FJKWHv3y7W7aBrewnOMrWR15dNbJ3
+* Netflix: https://drive.google.com/open?id=1bJQftqxlC8u4ijDf5gpEnw1tJE2nLfoG
 
-* Yahoo: https://drive.google.com/open?id=15mzraPmxNRzcfhXsd_KWBgKclUFUZQEj
+* Yahoo: https://drive.google.com/open?id=18k0ISgjtQhHHqoGi8A96Fm-Q2gX_jxgw
 
 
 Authors
