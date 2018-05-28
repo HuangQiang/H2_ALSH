@@ -1,4 +1,4 @@
-# H2_ALSH: Homocentric Hypersphere partition based Asymmetric LSH
+# H2_ALSH: Homocentric Hypersphere partition Asymmetric LSH
 
 Version: 1.0.0
 
