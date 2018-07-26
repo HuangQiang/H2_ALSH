@@ -67,6 +67,6 @@ displayed as follows:
 
 * **Qiang Huang, Guihong Ma, Jianlin Feng, Qiong Fang, and Anthony K. H. Tung. 
 Accurate and Fast Asymmetric Locality-Sensitive Hashing Scheme for Maximum 
-Inner Product Search. Accepted and to Appear in SIGKDD, 2018.**
+Inner Product Search. SIGKDD, pages 1561-1570, 2018.**
 
 If you use the package for publications, please cite the paper above.
