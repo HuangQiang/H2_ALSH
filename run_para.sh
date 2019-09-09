@@ -1,6 +1,6 @@
 #!/bin/bash
 make
-rm *.o
+make clean
 
 # ------------------------------------------------------------------------------
 #  Tuning approximation ratio c for c-AMIP search
