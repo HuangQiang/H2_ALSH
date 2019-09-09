@@ -1,6 +1,6 @@
 SRCS=util.cc random.cc pri_queue.cc qalsh.cc srp_lsh.cc l2_alsh.cc \
 	l2_alsh2.cc xbox.cc h2_alsh.cc simple_lsh.cc sign_alsh.cc \
-	amip.cc main.cc
+	amips.cc main.cc
 OBJS=${SRCS:.cc=.o}
 
 CXX=g++ -std=c++11
@@ -33,7 +33,7 @@ simple_lsh.o: simple_lsh.h
 
 sign_alsh.o: sign_alsh.h
 
-amip.o: amip.h
+amips.o: amips.h
 
 main.o:
 

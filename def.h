@@ -9,7 +9,7 @@
 #define SQR(x)		((x) * (x))
 #define SUM(x, y)	((x) + (y))
 #define DIFF(x, y)	((y) - (x))
-#define SWAP(x, y)	{int tmp=x; x=y; y=tmp;}
+#define SWAP(x, y)	{ int tmp=x; x=y; y=tmp; }
 
 // -----------------------------------------------------------------------------
 //  Constants

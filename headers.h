@@ -42,6 +42,6 @@
 #include "h2_alsh.h"
 #include "sign_alsh.h"
 #include "simple_lsh.h"
-#include "amip.h"
+#include "amips.h"
 
 using namespace std;

@@ -58,10 +58,7 @@ void usage() 						// display the usage of this package
 		"         Parameters: -alg 10 -n -qn -d -K -c0 -ds -qs -ts -of\n"
 		"\n"
 		"    11 - Norm Distributiuon\n"
-		"         Parameters: -alg 11 -n -qn -d -ds -qs -of\n"
-		"\n"
-		"    12 - AMIP search by Homocentric Hypersphere Partition and \n"
-		"         Parameters: -alg 11 -n -qn -d -ds -qs -of\n"
+		"         Parameters: -alg 11 -n -d -ds -of\n"
 		"\n"
 		"-------------------------------------------------------------------\n"
 		" Authors: Qiang Huang (huangq2011@gmail.com)                       \n"
@@ -76,23 +73,28 @@ int main(int nargs, char **args)
 	srand((unsigned) time(NULL));	// set the random seed
 	//usage();
 
-	int   alg       = -1;			// which algorithm?
-	int   n         = -1;			// cardinality
-	int   qn        = -1;			// query number
-	int   d         = -1;			// dimensionality
-	int   K         = -1;			// #tables for sign-alsh and simple-lsh
-	int   m         = -1;			// param for l2-alsh, l2-alsh2, sign-alsh
-	float U         = -1.0f;		// param for l2-alsh, l2-alsh2, sign-alsh
-	float nn_ratio  = -1.0f;		// approximation ratio of ANN search
-	float mip_ratio = -1.0f;		// approximation ratio of AMIP search
+	int    alg       = -1;			// which algorithm?
+	int    n         = -1;			// cardinality
+	int    qn        = -1;			// query number
+	int    d         = -1;			// dimensionality
+	int    K         = -1;			// #tables for sign-alsh and simple-lsh
+	int    m         = -1;			// param for l2-alsh, l2-alsh2, sign-alsh
+	float  U         = -1.0f;		// param for l2-alsh, l2-alsh2, sign-alsh
+	float  nn_ratio  = -1.0f;		// approximation ratio of ANN search
+	float  mip_ratio = -1.0f;		// approximation ratio of AMIP search
+	
+	char   data_set[200];			// address of data set
+	char   query_set[200];			// address of query set
+	char   truth_set[200];			// address of ground truth file
+	char   output_folder[200];		// output folder
 
-	char  data_set[200];			// address of data set
-	char  query_set[200];			// address of query set
-	char  truth_set[200];			// address of ground truth file
-	char  output_folder[200];		// output folder
-
-	bool  failed = false;
-	int   cnt = 1;
+	float  **pre     = NULL;		// precision array
+	float  **recall  = NULL;		// recall array
+	float  **data    = NULL;		// data set
+	float  **query   = NULL;		// query set
+	Result **R       = NULL;		// truth set
+	bool   failed    = false;
+	int    cnt       = 1;
 	
 	while (cnt < nargs && !failed) {
 		if (strcmp(args[cnt], "-alg") == 0) {
@@ -202,19 +204,20 @@ int main(int nargs, char **args)
 	// -------------------------------------------------------------------------
 	//  read data set, query set, and ground truth file
 	// -------------------------------------------------------------------------
-	float** data = new float*[n];
+	data = new float*[n];
 	for (int i = 0; i < n; ++i) data[i] = new float[d];
 	if (read_data(n, d, data_set, data) == 1) {
 		return 1;
 	}
 
-	float** query = new float*[qn];
-	for (int i = 0; i < qn; ++i) query[i] = new float[d];
-	if (read_data(qn, d, query_set, query) == 1) {
-		return 1;
-	}
+	if (alg >= 0 && alg <= 10) {
+        query = new float*[qn];
+        for (int i = 0; i < qn; ++i) query[i] = new float[d];
+        if (read_data(qn, d, query_set, query) == 1) {
+            return 1;
+        }
+    }
 
-	Result **R = NULL;
 	if (alg >= 1 && alg <= 10) {
 		R = new Result*[qn];
 		for (int i = 0; i < qn; ++i) R[i] = new Result[MAXK];
@@ -223,8 +226,6 @@ int main(int nargs, char **args)
 		}
 	}
 
-	float **pre    = NULL;
-	float **recall = NULL;
 	if (alg >= 8 && alg <= 10) {
 		pre    = new float*[MAX_ROUND];
 		recall = new float*[MAX_ROUND];
@@ -245,8 +246,8 @@ int main(int nargs, char **args)
 	// -------------------------------------------------------------------------
 	switch (alg) {
 	case 0:
-		ground_truth(n, qn, d, (const float **) data, (const float **) query, 
-			truth_set);
+		mip_ground_truth(n, qn, d, (const float **) data, 
+            (const float **) query, truth_set);
 		break;
 	case 1:
 		h2_alsh(n, qn, d, nn_ratio, mip_ratio, (const float **) data, 
@@ -308,10 +309,12 @@ int main(int nargs, char **args)
 	}
 	delete[] data; data  = NULL;
 
-	for (int i = 0; i < qn; ++i) {
-		delete[] query[i]; query[i] = NULL;
-	}
-	delete[] query; query = NULL;
+    if (alg >= 0 && alg <= 10) {
+        for (int i = 0; i < qn; ++i) {
+            delete[] query[i]; query[i] = NULL;
+        }
+        delete[] query; query = NULL;
+    }
 
 	if (alg >= 1 && alg <= 10) {
 		delete[] R; R = NULL;
@@ -328,5 +331,3 @@ int main(int nargs, char **args)
 	
 	return 0;
 }
-
-

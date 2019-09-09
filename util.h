@@ -3,13 +3,6 @@
 
 class MaxK_List;
 
-extern timeval g_start_time;		// global parameter: start time
-extern timeval g_end_time;			// global parameter: end time
-
-extern float   g_runtime;			// global parameter: running time
-extern float   g_ratio;				// global parameter: overall ratio
-extern float   g_recall;			// global parameter: recall
-
 // -----------------------------------------------------------------------------
 //  struct Result
 // -----------------------------------------------------------------------------
@@ -17,6 +10,13 @@ struct Result {						// structure for furthest neighbor / hash value
 	float key_;							// distance / random projection value
 	int   id_;							// object id
 };
+
+extern timeval g_start_time;		// global parameter: start time
+extern timeval g_end_time;			// global parameter: end time
+
+extern float   g_runtime;			// global parameter: running time
+extern float   g_ratio;				// global parameter: overall ratio
+extern float   g_recall;			// global parameter: recall
 
 // -----------------------------------------------------------------------------
 int ResultComp(						// compare function for qsort (ascending)
@@ -85,7 +85,7 @@ int get_hits(						// get the number of hits between two ID list
 	MaxK_List *list);					// results returned by algorithms
 
 // -----------------------------------------------------------------------------
-int ground_truth(					// find the ground truth results
+int mip_ground_truth(				// find the ground truth MIP results
 	int   n,							// number of data points
 	int   qn,							// number of query points
 	int   d,							// dimension of space

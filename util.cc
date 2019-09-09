@@ -4,10 +4,9 @@
 timeval g_start_time;
 timeval g_end_time;
 
-float   g_runtime = -1.0f;
-float   g_ratio   = -1.0f;
-float   g_recall  = -1.0f;
-
+float   g_runtime  = -1.0f;
+float   g_ratio    = -1.0f;
+float   g_recall   = -1.0f;
 
 // -----------------------------------------------------------------------------
 int ResultComp(						// compare function for qsort (ascending)
@@ -225,7 +224,7 @@ int get_hits(						// get the number of hits between two ID list
 }
 
 // -----------------------------------------------------------------------------
-int ground_truth(					// find the ground truth results
+int mip_ground_truth(				// find the ground truth MIP results
 	int   n,							// number of data points
 	int   qn,							// number of query points
 	int   d,							// dimension of space
