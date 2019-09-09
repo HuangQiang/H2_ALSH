@@ -1,50 +1,18 @@
 #include "headers.h"
 
 // -----------------------------------------------------------------------------
-H2_ALSH::H2_ALSH()					// default constructor
-{
-	n_pts_        = -1;
-	dim_          = -1;
-	nn_ratio_     = -1.0f;
-	mip_ratio_    = -1.0f;
-	data_         = NULL;
-
-	b_            = -1.0f;
-	M_            = -1.0f;
-	h2_alsh_dim_  = -1;
-	h2_alsh_data_ = NULL;
-	num_blocks_   = 0;
-}
-
-// -----------------------------------------------------------------------------
-H2_ALSH::~H2_ALSH()					// destructor
-{
-	if (h2_alsh_data_ != NULL) {
-		for (int i = 0; i < n_pts_; ++i) {
-			delete[] h2_alsh_data_[i]; h2_alsh_data_[i] = NULL;
-		}
-		delete[] h2_alsh_data_; h2_alsh_data_ = NULL;
-	}
-
-	if (!blocks_.empty()) {
-		for (int i = 0; i < num_blocks_; ++i) {
-			delete blocks_[i]; blocks_[i] = NULL;
-		}
-		blocks_.clear(); blocks_.shrink_to_fit();
-	}
-}
-
-// -----------------------------------------------------------------------------
-void H2_ALSH::build(				// build index
+H2_ALSH::H2_ALSH(					// constructor
 	int   n,							// number of data objects
 	int   d,							// dimension of data objects
 	float nn_ratio,						// approximation ratio for ANN search
 	float mip_ratio,					// approximation ratio for AMIP search
+	FILE  *fp,							// output file pointer
 	const float **data)					// input data
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
 	n_pts_     = n;	
 	dim_       = d;
 	nn_ratio_  = nn_ratio;
@@ -58,11 +26,34 @@ void H2_ALSH::build(				// build index
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
-	display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+
+	// -------------------------------------------------------------------------
+	//  display parameters
+	// -------------------------------------------------------------------------
+	printf("Parameters of H2_ALSH:\n");
+	printf("    n          = %d\n", n_pts_);
+	printf("    d          = %d\n", dim_);
+	printf("    c          = %.2f\n", nn_ratio_);
+	printf("    c0         = %.2f\n", mip_ratio_);
+	printf("    M          = %.2f\n", M_);
+	printf("    num_blocks = %d\n\n", num_blocks_);
+	printf("Indexing Time: %f Seconds\n\n", indexing_time);
+
+	fprintf(fp, "n          = %d\n", n_pts_);
+	fprintf(fp, "d          = %d\n", dim_);
+	fprintf(fp, "c          = %f\n", nn_ratio_);
+	fprintf(fp, "c0         = %f\n", mip_ratio_);
+	fprintf(fp, "M          = %f\n", M_);
+	fprintf(fp, "num_blocks = %d\n", num_blocks_);
+	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
 }
 
 // -----------------------------------------------------------------------------
-int H2_ALSH::bulkload()				// bulkloading
+void H2_ALSH::bulkload()			// bulkloading
 {
 	// -------------------------------------------------------------------------
 	//  sort data objects by their Euclidean norms under the ascending order
@@ -78,7 +69,6 @@ int H2_ALSH::bulkload()				// bulkloading
 	// -------------------------------------------------------------------------
 	//  construct new data
 	// -------------------------------------------------------------------------
-	printf("Construct H2_ALSH Data\n\n");
 	h2_alsh_data_ = new float*[n_pts_];
 	num_blocks_ = 0;
 
@@ -128,21 +118,24 @@ int H2_ALSH::bulkload()				// bulkloading
 		num_blocks_++;
 		blocks_.push_back(block);
 	}
-
-	return 0;
 }
 
 // -----------------------------------------------------------------------------
-void H2_ALSH::display()				// display parameters
+H2_ALSH::~H2_ALSH()					// destructor
 {
-	printf("Parameters of H2_ALSH:\n");
-	printf("    n          = %d\n", n_pts_);
-	printf("    d          = %d\n", dim_);
-	printf("    c          = %.2f\n", nn_ratio_);
-	printf("    c0         = %.2f\n", mip_ratio_);
-	printf("    M          = %.2f\n", M_);
-	printf("    num_blocks = %d\n", num_blocks_);
-	printf("\n");
+	if (h2_alsh_data_ != NULL) {
+		for (int i = 0; i < n_pts_; ++i) {
+			delete[] h2_alsh_data_[i]; h2_alsh_data_[i] = NULL;
+		}
+		delete[] h2_alsh_data_; h2_alsh_data_ = NULL;
+	}
+
+	if (!blocks_.empty()) {
+		for (int i = 0; i < num_blocks_; ++i) {
+			delete blocks_[i]; blocks_[i] = NULL;
+		}
+		blocks_.clear(); blocks_.shrink_to_fit();
+	}
 }
 
 // -----------------------------------------------------------------------------

@@ -60,6 +60,9 @@ void usage() 						// display the usage of this package
 		"    11 - Norm Distributiuon\n"
 		"         Parameters: -alg 11 -n -qn -d -ds -qs -of\n"
 		"\n"
+		"    12 - AMIP search by Homocentric Hypersphere Partition and \n"
+		"         Parameters: -alg 11 -n -qn -d -ds -qs -of\n"
+		"\n"
 		"-------------------------------------------------------------------\n"
 		" Authors: Qiang Huang (huangq2011@gmail.com)                       \n"
 		"          Guihong Ma  (maguihong@vip.qq.com)                       \n"
@@ -197,28 +200,45 @@ int main(int nargs, char **args)
 	printf("\n");
 
 	// -------------------------------------------------------------------------
-	//  read data set and query set
+	//  read data set, query set, and ground truth file
 	// -------------------------------------------------------------------------
-	timeval start_time, end_time;
-
-	gettimeofday(&start_time, NULL);
 	float** data = new float*[n];
 	for (int i = 0; i < n; ++i) data[i] = new float[d];
 	if (read_data(n, d, data_set, data) == 1) {
-		printf("Reading dataset error!\n");
 		return 1;
 	}
 
 	float** query = new float*[qn];
 	for (int i = 0; i < qn; ++i) query[i] = new float[d];
 	if (read_data(qn, d, query_set, query) == 1) {
-		printf("Reading query set error!\n");
 		return 1;
 	}
-	gettimeofday(&end_time, NULL);
-	float read_file_time = end_time.tv_sec - start_time.tv_sec + 
-		(end_time.tv_usec - start_time.tv_usec) / 1000000.0f;
-	printf("Read Data and Query: %f Seconds\n\n", read_file_time);
+
+	Result **R = NULL;
+	if (alg >= 1 && alg <= 10) {
+		R = new Result*[qn];
+		for (int i = 0; i < qn; ++i) R[i] = new Result[MAXK];
+		if (read_ground_truth(qn, truth_set, R) == 1) {
+			return 1;
+		}
+	}
+
+	float **pre    = NULL;
+	float **recall = NULL;
+	if (alg >= 8 && alg <= 10) {
+		pre    = new float*[MAX_ROUND];
+		recall = new float*[MAX_ROUND];
+
+		for (int round = 0; round < MAX_ROUND; ++round) {
+			pre[round]    = new float[MAX_T];
+			recall[round] = new float[MAX_T];
+
+			for (int t = 0; t < MAX_T; ++t) {
+				pre[round][t]    = 0;
+				recall[round][t] = 0;
+			}
+		}
+	}
 
 	// -------------------------------------------------------------------------
 	//  methods
@@ -230,43 +250,46 @@ int main(int nargs, char **args)
 		break;
 	case 1:
 		h2_alsh(n, qn, d, nn_ratio, mip_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+			(const float **) query, (const Result **) R, output_folder);
 		break;
 	case 2:
 		l2_alsh(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+			(const float **) query, (const Result **) R, output_folder);
 		break;
 	case 3:
 		l2_alsh2(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+			(const float **) query, (const Result **) R, output_folder);
 		break;
 	case 4:
 		xbox(n, qn, d, nn_ratio, (const float **) data, (const float **) query, 
-			truth_set, output_folder);
+			(const Result **) R, output_folder);
 		break;
 	case 5:
 		sign_alsh(n, qn, d, K, m, U, nn_ratio, (const float **) data, 
-			(const float **) query,  truth_set, output_folder);
+			(const float **) query, (const Result **) R, output_folder);
 		break;
 	case 6:
 		simple_lsh(n, qn, d, K, nn_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+			(const float **) query, (const Result **) R, output_folder);
 		break;
 	case 7:
 		linear_scan(n, qn, d, (const float **) data, (const float **) query,
-			truth_set, output_folder);
+			(const Result **) R, output_folder);
 		break;
 	case 8:
-		h2_alsh_precision_recall(n, qn, d, nn_ratio, mip_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+		h2_alsh_precision_recall(n, qn, d, nn_ratio, mip_ratio, pre, recall, 
+			(const float **) data, (const float **) query, 
+			(const Result **) R, output_folder);
 		break;
 	case 9:
-		sign_alsh_precision_recall(n, qn, d, K, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+		sign_alsh_precision_recall(n, qn, d, K, m, U, nn_ratio, pre, recall, 
+			(const float **) data, (const float **) query, 
+			(const Result **) R, output_folder);
 		break;
 	case 10:
-		simple_lsh_precision_recall(n, qn, d, K, nn_ratio, (const float **) data, 
-			(const float **) query, truth_set, output_folder);
+		simple_lsh_precision_recall(n, qn, d, K, nn_ratio, pre, recall, 
+			(const float **) data, (const float **) query, 
+			(const Result **) R, output_folder);
 		break;
 	case 11:
 		norm_distribution(n, d, (const float **) data, output_folder);
@@ -290,6 +313,19 @@ int main(int nargs, char **args)
 	}
 	delete[] query; query = NULL;
 
+	if (alg >= 1 && alg <= 10) {
+		delete[] R; R = NULL;
+	}
+
+	if (alg >= 8 && alg <= 10) {
+		for (int i = 0; i < MAX_ROUND; ++i) {
+			delete[] pre[i];	pre[i] = NULL;
+			delete[] recall[i];	recall[i] = NULL;
+		}
+		delete[] pre;	 pre = NULL;
+		delete[] recall; recall = NULL;
+	}
+	
 	return 0;
 }
 

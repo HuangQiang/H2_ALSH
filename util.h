@@ -3,6 +3,13 @@
 
 class MaxK_List;
 
+extern timeval g_start_time;		// global parameter: start time
+extern timeval g_end_time;			// global parameter: end time
+
+extern float   g_runtime;			// global parameter: running time
+extern float   g_ratio;				// global parameter: overall ratio
+extern float   g_recall;			// global parameter: recall
+
 // -----------------------------------------------------------------------------
 //  struct Result
 // -----------------------------------------------------------------------------
@@ -76,5 +83,21 @@ int get_hits(						// get the number of hits between two ID list
 	int   t,							// top-t value
 	const Result *R,					// ground truth results 
 	MaxK_List *list);					// results returned by algorithms
+
+// -----------------------------------------------------------------------------
+int ground_truth(					// find the ground truth results
+	int   n,							// number of data points
+	int   qn,							// number of query points
+	int   d,							// dimension of space
+	const float **data,					// data set
+	const float **query,				// query set
+	const char  *truth_set);			// address of truth set
+
+// -----------------------------------------------------------------------------
+int norm_distribution(				// analyse norm distribution of data
+	int   n,							// number of data points
+	int   d,							// dimension of space
+	const float **data,					// data set
+	const char  *output_folder);		// output folder
 
 #endif // __UTIL_H

@@ -1,46 +1,19 @@
 #include "headers.h"
 
 // -----------------------------------------------------------------------------
-L2_ALSH::L2_ALSH()					// default constructor
-{
-	n_pts_        = -1;
-	dim_          = -1;
-	m_            = -1;
-	U_            = -1.0f;
-	appr_ratio_   = -1.0f;
-	l2_alsh_dim_  = -1;
-	l2_alsh_data_ = NULL;
-	data_         = NULL;
-	lsh_          = NULL;
-}
-
-// -----------------------------------------------------------------------------
-L2_ALSH::~L2_ALSH()					// destructor
-{
-	if (l2_alsh_data_ != NULL) {
-		for (int i = 0; i < n_pts_; ++i) {
-			delete[] l2_alsh_data_[i]; l2_alsh_data_[i] = NULL;
-		}
-		delete[] l2_alsh_data_; l2_alsh_data_ = NULL;
-	}
-
-	if (lsh_ != NULL) {
-		delete lsh_; lsh_ = NULL;
-	}
-}
-
-// -----------------------------------------------------------------------------
-void L2_ALSH::build(				// init the parameters
+L2_ALSH::L2_ALSH(					// constructor
 	int   n,							// number of data objects
 	int   d,							// dimension of data objects
 	int   m,							// additional dimension of data
 	float U,							// scale factor for data
 	float ratio,						// approximation ratio
+	FILE  *fp,							// output file pointer
 	const float** data)					// data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
 	n_pts_       = n;
 	dim_         = d;
 	m_           = m;
@@ -53,11 +26,34 @@ void L2_ALSH::build(				// init the parameters
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
-	display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+
+	// -------------------------------------------------------------------------
+	//  display parameters
+	// -------------------------------------------------------------------------
+	printf("Parameters of L2_ALSH:\n");
+	printf("    n = %d\n", n_pts_);
+	printf("    d = %d\n", dim_);
+	printf("    m = %d\n", m_);
+	printf("    U = %.2f\n", U_);
+	printf("    c = %.2f\n", appr_ratio_);
+	printf("    M = %.2f\n\n", M_);
+	printf("Indexing Time: %f Seconds\n\n", indexing_time);
+
+	fprintf(fp, "n          = %d\n", n_pts_);
+	fprintf(fp, "d          = %d\n", dim_);
+	fprintf(fp, "m          = %d\n", m_);
+	fprintf(fp, "U          = %.2f\n", U_);
+	fprintf(fp, "c          = %.2f\n", appr_ratio_);
+	fprintf(fp, "M          = %.2f\n", M_);
+	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
 }
 
 // -----------------------------------------------------------------------------
-int L2_ALSH::bulkload()				// bulkloading
+void L2_ALSH::bulkload()			// bulkloading
 {
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm
@@ -76,7 +72,6 @@ int L2_ALSH::bulkload()				// bulkloading
 	float scale = U_ / M_;
 	int   exponent = -1;
 
-	printf("Construct L2_ALSH Data\n\n");
 	l2_alsh_data_ = new float*[n_pts_];
 	for (int i = 0; i < n_pts_; ++i) {
 		l2_alsh_data_[i] = new float[l2_alsh_dim_];
@@ -96,23 +91,22 @@ int L2_ALSH::bulkload()				// bulkloading
 	// -------------------------------------------------------------------------
 	//  indexing the new format of data using qalsh
 	// -------------------------------------------------------------------------
-	lsh_ = new QALSH(n_pts_, l2_alsh_dim_, appr_ratio_, 
-		(const float **) l2_alsh_data_);
-
-	return 0;
+	lsh_ = new QALSH(n_pts_, l2_alsh_dim_, appr_ratio_, (const float **) l2_alsh_data_);
 }
 
 // -----------------------------------------------------------------------------
-void L2_ALSH::display()				// display parameters
+L2_ALSH::~L2_ALSH()					// destructor
 {
-	printf("Parameters of L2_ALSH:\n");
-	printf("    n = %d\n", n_pts_);
-	printf("    d = %d\n", dim_);
-	printf("    m = %d\n", m_);
-	printf("    U = %.2f\n", U_);
-	printf("    c = %.2f\n", appr_ratio_);
-	printf("    M = %.2f\n", M_);
-	printf("\n");
+	if (l2_alsh_data_ != NULL) {
+		for (int i = 0; i < n_pts_; ++i) {
+			delete[] l2_alsh_data_[i]; l2_alsh_data_[i] = NULL;
+		}
+		delete[] l2_alsh_data_; l2_alsh_data_ = NULL;
+	}
+
+	if (lsh_ != NULL) {
+		delete lsh_; lsh_ = NULL;
+	}
 }
 
 // -----------------------------------------------------------------------------

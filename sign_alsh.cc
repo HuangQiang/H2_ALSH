@@ -1,48 +1,20 @@
 #include "headers.h"
 
-
 // -----------------------------------------------------------------------------
-Sign_ALSH::Sign_ALSH()				// default constructor
-{
-	n_pts_          = -1;
-	dim_            = -1;
-	K_              = -1;
-	m_              = -1;
-	U_              = -1.0f;
-	appr_ratio_     = -1.0f;
-	sign_alsh_dim_  = -1;
-	sign_alsh_data_ = NULL;
-	data_           = NULL;
-}
-
-// -----------------------------------------------------------------------------
-Sign_ALSH::~Sign_ALSH()				// destructor
-{
-	if (sign_alsh_data_ != NULL) {
-		for (int i = 0; i < n_pts_; ++i) {
-			delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
-		}
-		delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
-	}
-
-	if (lsh_ != NULL) {
-		delete lsh_; lsh_ = NULL;
-	}
-}
-
-// -----------------------------------------------------------------------------
-void Sign_ALSH::build(				// build index
+Sign_ALSH::Sign_ALSH(				// constructor
 	int   n,							// number of data objects
 	int   d,							// dimension of data objects
 	int   K,							// number of hash tables
 	int   m,							// additional dimension of data
 	float U,							// scale factor for data
 	float ratio,						// approximation ratio for AMC search
+	FILE  *fp,							// output file pointer
 	const float** data)			 		// data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
 	n_pts_         = n;
 	dim_           = d;
 	K_             = K;
@@ -56,11 +28,36 @@ void Sign_ALSH::build(				// build index
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
-	display();
+	
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+
+	// -------------------------------------------------------------------------
+	//  display parameters
+	// -------------------------------------------------------------------------
+	printf("Parameters of Sign_ALSH:\n");
+	printf("    n = %d\n", n_pts_);
+	printf("    d = %d\n", dim_);
+	printf("    K = %d\n", K_);
+	printf("    m = %d\n", m_);
+	printf("    U = %.2f\n", U_);
+	printf("    c = %.2f\n", appr_ratio_);
+	printf("    M = %.2f\n\n", M_);
+	printf("Indexing Time: %f Seconds\n\n", indexing_time);
+
+	fprintf(fp, "n          = %d\n", n_pts_);
+	fprintf(fp, "d          = %d\n", dim_);
+	fprintf(fp, "K          = %d\n", K_);
+	fprintf(fp, "m          = %d\n", m_);
+	fprintf(fp, "U          = %.2f\n", U_);
+	fprintf(fp, "c          = %.2f\n", appr_ratio_);
+	fprintf(fp, "M          = %.2f\n", M_);
+	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
 }
 
 // -----------------------------------------------------------------------------
-int Sign_ALSH::bulkload()			// bulkloading
+void Sign_ALSH::bulkload()			// bulkloading
 {
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
@@ -79,7 +76,6 @@ int Sign_ALSH::bulkload()			// bulkloading
 	float scale = U_ / M_;
 	int   exponent = -1;
 
-	printf("Construct Sign_ALSH Data\n\n");
 	sign_alsh_data_ = new float*[n_pts_];
 	for (int i = 0; i < n_pts_; ++i) {
 		sign_alsh_data_[i] = new float[sign_alsh_dim_];
@@ -99,24 +95,22 @@ int Sign_ALSH::bulkload()			// bulkloading
 	// -------------------------------------------------------------------------
 	//  indexing the new format of data using srp-lsh
 	// -------------------------------------------------------------------------
-	lsh_ = new SRP_LSH(n_pts_, sign_alsh_dim_, K_, 
-		(const float **) sign_alsh_data_);
-
-	return 0;
+	lsh_ = new SRP_LSH(n_pts_, sign_alsh_dim_, K_, (const float **) sign_alsh_data_);
 }
 
 // -----------------------------------------------------------------------------
-void Sign_ALSH::display()			// display parameters
+Sign_ALSH::~Sign_ALSH()				// destructor
 {
-	printf("Parameters of Sign_ALSH:\n");
-	printf("    n = %d\n", n_pts_);
-	printf("    d = %d\n", dim_);
-	printf("    K = %d\n", K_);
-	printf("    m = %d\n", m_);
-	printf("    U = %.2f\n", U_);
-	printf("    c = %.2f\n", appr_ratio_);
-	printf("    M = %.2f\n", M_);
-	printf("\n");
+	if (sign_alsh_data_ != NULL) {
+		for (int i = 0; i < n_pts_; ++i) {
+			delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
+		}
+		delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
+	}
+
+	if (lsh_ != NULL) {
+		delete lsh_; lsh_ = NULL;
+	}
 }
 
 // -----------------------------------------------------------------------------

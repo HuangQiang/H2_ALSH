@@ -26,19 +26,19 @@ class MaxK_List;
 // -----------------------------------------------------------------------------
 class L2_ALSH2 {
 public:
-	L2_ALSH2();						// default constructor
-	~L2_ALSH2();					// destructor
-
-	// -------------------------------------------------------------------------
-	void build(						// build index
+	L2_ALSH2(						// constructor
 		int   n,						// number of data objects
 		int   qn,						// number of queries
 		int   d,						// dimension of data objects
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
 		float ratio,					// approximation ratio
+		FILE  *fp,						// output file pointer
 		const float **data,				// data objects
 		const float **query);			// queries
+
+	// -------------------------------------------------------------------------
+	~L2_ALSH2();					// destructor
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -60,12 +60,9 @@ protected:
 	QALSH *lsh_;					// qalsh
 
 	// -------------------------------------------------------------------------
-	int bulkload(					// bulkloading
+	void bulkload(					// bulkloading
 		int   qn,						// number of queries
 		const float **query);			// queries
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
 };
 
 #endif // __L2_ALSH2_H

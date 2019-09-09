@@ -14,16 +14,15 @@ class SRP_LSH;
 // -----------------------------------------------------------------------------
 class Simple_LSH {
 public:
-	Simple_LSH();					// defaut constructor
-	~Simple_LSH();					// destructor
-
-	// -------------------------------------------------------------------------
-	void build(						// build index
+	Simple_LSH(						// constructor
 		int   n,						// number of data
 		int   d,						// dimension of data
 		int   K,						// number of hash tables
 		float ratio,					// approximation ratio
+		FILE  *fp,						// output file pointer
 		const float** data);			// data objects
+
+	~Simple_LSH();					// destructor
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -44,10 +43,7 @@ protected:
 	SRP_LSH *lsh_;					// SRP_LSH
 
 	// -------------------------------------------------------------------------
-	int bulkload();					// bulkloading
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
+	void bulkload();				// bulkloading
 };
 
 #endif // __SIMPLE_LSH_H

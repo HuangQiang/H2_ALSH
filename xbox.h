@@ -20,15 +20,15 @@ class MaxK_List;
 // -----------------------------------------------------------------------------
 class XBox {
 public:
-	XBox();							// default constructor
-	~XBox();						// destructor
-
-	// -------------------------------------------------------------------------
-	void build(						// build index
+	XBox(							// default constructor
 		int   n,						// number of data objects
 		int   d,						// dimension of data objects
 		float ratio,					// approximation ratio
+		FILE  *fp,						// output file pointer
 		const float** data);			// original data objects
+
+	// -------------------------------------------------------------------------
+	~XBox();						// destructor
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -49,10 +49,7 @@ protected:
 	QALSH *lsh_;					// qalsh
 
 	// -------------------------------------------------------------------------
-	int bulkload();					// bulkloading
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
+	void bulkload();				// bulkloading
 };
 
 #endif // __XBOX_H

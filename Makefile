@@ -38,4 +38,4 @@ amip.o: amip.h
 main.o:
 
 clean:
-	-rm ${OBJS} alsh
+	-rm ${OBJS}

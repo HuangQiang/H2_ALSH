@@ -1,5 +1,14 @@
 #include "headers.h"
 
+
+timeval g_start_time;
+timeval g_end_time;
+
+float   g_runtime = -1.0f;
+float   g_ratio   = -1.0f;
+float   g_recall  = -1.0f;
+
+
 // -----------------------------------------------------------------------------
 int ResultComp(						// compare function for qsort (ascending)
 	const void *e1,						// 1st element
@@ -73,6 +82,7 @@ int read_data(						// read data/query set from disk
 	const char *fname,					// address of data/query set
 	float **data)						// data/query objects (return)
 {
+	gettimeofday(&g_start_time, NULL);
 	FILE *fp = fopen(fname, "r");
 	if (!fp) {
 		printf("Could not open %s\n", fname);
@@ -93,6 +103,11 @@ int read_data(						// read data/query set from disk
 	assert(feof(fp) && i == n);
 	fclose(fp);
 
+	gettimeofday(&g_end_time, NULL);
+	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Read Data: %f Seconds\n\n", running_time);
+
 	return 0;
 }
 
@@ -102,6 +117,7 @@ int read_ground_truth(				// read ground truth results from disk
 	const char *fname,					// address of truth set
 	Result **R)							// ground truth results (return)
 {
+	gettimeofday(&g_start_time, NULL);
 	FILE *fp = fopen(fname, "r");
 	if (!fp) {
 		printf("Could not open %s\n", fname);
@@ -120,6 +136,11 @@ int read_ground_truth(				// read ground truth results from disk
 		fscanf(fp, "\n");
 	}
 	fclose(fp);
+
+	gettimeofday(&g_end_time, NULL);
+	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Read Ground Truth: %f Seconds\n\n", running_time);
 
 	return 0;
 }
@@ -201,4 +222,114 @@ int get_hits(						// get the number of hits between two ID list
 		i--;
 	}
 	return min(t, i + 1);
+}
+
+// -----------------------------------------------------------------------------
+int ground_truth(					// find the ground truth results
+	int   n,							// number of data points
+	int   qn,							// number of query points
+	int   d,							// dimension of space
+	const float **data,					// data set
+	const float **query,				// query set
+	const char  *truth_set)				// address of truth set
+{
+	// -------------------------------------------------------------------------
+	//  find ground truth results (using linear scan method)
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	FILE *fp = fopen(truth_set, "w");
+	if (!fp) {
+		printf("Could not create %s.\n", truth_set);
+		return 1;
+	}
+
+	MaxK_List *list = new MaxK_List(MAXK);
+	fprintf(fp, "%d %d\n", qn, MAXK);
+	for (int i = 0; i < qn; ++i) {
+		list->reset();
+		for (int j = 0; j < n; ++j) {	
+			float ip = calc_inner_product(d, data[j], query[i]);
+			list->insert(ip, j + 1);
+		}
+
+		for (int j = 0; j < MAXK; ++j) {
+			fprintf(fp, "%d %f ", list->ith_id(j), list->ith_key(j));
+		}
+		fprintf(fp, "\n");
+	}
+	fclose(fp);
+
+	gettimeofday(&g_end_time, NULL);
+	float truth_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Ground Truth: %f Seconds\n\n", truth_time);
+
+	// -------------------------------------------------------------------------
+	//  release space
+	// -------------------------------------------------------------------------
+	delete list; list = NULL;
+	
+	return 0;
+}
+
+// -----------------------------------------------------------------------------
+int norm_distribution(				// analyse norm distribution of data
+	int   n,							// number of data points
+	int   d,							// dimension of space
+	const float **data,					// data set
+	const char  *output_folder) 		// output folder
+{
+	// -------------------------------------------------------------------------
+	//  calc norm for all data objects
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	vector<float> norm(n, 0.0f);
+	float max_norm = MINREAL;
+
+	for (int i = 0; i < n; ++i) {
+		norm[i] = sqrt(calc_inner_product(d, data[i], data[i]));
+		if (norm[i] > max_norm) max_norm = norm[i];
+	}
+
+	// -------------------------------------------------------------------------
+	//  get the percentage of frequency of norm
+	// -------------------------------------------------------------------------
+	int m = 25;
+	float interval = max_norm / m;
+	printf("m = %d, max_norm = %f, interval = %f\n", m, max_norm, interval);
+
+	vector<int> freq(m, 0);
+	for (int i = 0; i < n; ++i) {
+		int id = (int) ceil(norm[i] / interval) - 1;
+		if (id < 0) id = 0;
+		if (id >= m) id = m - 1;
+		freq[id]++;
+	}
+
+	// -------------------------------------------------------------------------
+	//  write norm distribution
+	// -------------------------------------------------------------------------
+	char output_set[200];
+	sprintf(output_set, "%snorm_distribution.out", output_folder);
+
+	FILE *fp = fopen(output_set, "w");
+	if (!fp) {
+		printf("Could not create %s\n", output_set);
+		return 1;
+	}
+
+	float num = 0.5f / m; 
+	float step = 1.0f / m;
+	for (int i = 0; i < m; ++i) {
+		fprintf(fp, "%.1f\t%f\n", (num + step * i) * 100.0, freq[i] * 100.0 / n);
+	}
+	fprintf(fp, "\n");
+	fclose(fp);
+
+	gettimeofday(&g_end_time, NULL);
+	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
+		g_start_time.tv_usec) / 1000000.0f;
+	printf("Norm distribution: %.6f Seconds\n\n", runtime);
+
+	return 0;
 }

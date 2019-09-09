@@ -14,18 +14,18 @@ class SRP_LSH;
 // -----------------------------------------------------------------------------
 class Sign_ALSH {
 public:
-	Sign_ALSH();					// default constructor
-	~Sign_ALSH();					// destrcutor
-
-	// -------------------------------------------------------------------------
-	void build(						// build index
+	Sign_ALSH(						// constructor
 		int   n,						// number of data objects
 		int   d,						// dimension of data objects
 		int   K,						// number of hash tables
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
 		float ratio,					// approximation ratio for AMC search
+		FILE  *fp,						// output file pointer
 		const float** data);	 		// data objects
+
+	// -------------------------------------------------------------------------	
+	~Sign_ALSH();					// destrcutor
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -48,10 +48,7 @@ protected:
 	SRP_LSH *lsh_;					// SRP_LSH
 
 	// -------------------------------------------------------------------------
-	int bulkload();					// bulkloading
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
+	void bulkload();				// bulkloading
 };
 
 #endif // __SIGN_ALSH_H

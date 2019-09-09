@@ -1,45 +1,18 @@
 #include "headers.h"
 
 // -----------------------------------------------------------------------------
-Simple_LSH::Simple_LSH()			// default constructor
-{
-	n_pts_           = -1;
-	dim_             = -1;
-	K_               = -1;
-	appr_ratio_      = -1.0f;
-	data_            = NULL;
-	M_               = -1.0f;
-	simple_lsh_dim_  = -1;
-	simple_lsh_data_ = NULL;
-	lsh_             = NULL;
-}
-
-// -----------------------------------------------------------------------------
-Simple_LSH::~Simple_LSH()			// destructor
-{
-	if (simple_lsh_data_ != NULL) {
-		for (int i = 0; i < n_pts_; ++i) {
-			delete[] simple_lsh_data_[i]; simple_lsh_data_[i] = NULL;
-		}
-		delete[] simple_lsh_data_; simple_lsh_data_ = NULL;
-	}
-
-	if (lsh_ != NULL) {
-		delete lsh_; lsh_ = NULL;
-	}
-}
-
-// -----------------------------------------------------------------------------
-void Simple_LSH::build(				// build index
+Simple_LSH::Simple_LSH(				// constructor
 	int   n,							// number of data
 	int   d,							// dimension of data
 	int   K,							// number of hash tables
 	float ratio,						// approximation ratio
+	FILE  *fp,							// output file pointer
 	const float** data)					// data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
 	n_pts_          = n;
 	dim_            = d;
 	K_              = K;
@@ -51,11 +24,32 @@ void Simple_LSH::build(				// build index
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
-	display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+
+	// -------------------------------------------------------------------------
+	//  display parameters
+	// -------------------------------------------------------------------------
+	printf("Parameters of Simple_LSH:\n");
+	printf("    n = %d\n", n_pts_);
+	printf("    d = %d\n", dim_);
+	printf("    K = %d\n", K_);
+	printf("    c = %.2f\n", appr_ratio_);
+	printf("    M = %.2f\n\n", M_);
+	printf("Indexing Time: %f Seconds\n\n", indexing_time);
+
+	fprintf(fp, "n          = %d\n", n_pts_);
+	fprintf(fp, "d          = %d\n", dim_);
+	fprintf(fp, "K          = %d\n", K_);
+	fprintf(fp, "c          = %.2f\n", appr_ratio_);
+	fprintf(fp, "M          = %.2f\n", M_);
+	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
 }
 
 // -----------------------------------------------------------------------------
-int Simple_LSH::bulkload()			// bulkloading
+void Simple_LSH::bulkload()			// bulkloading
 {
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
@@ -74,7 +68,6 @@ int Simple_LSH::bulkload()			// bulkloading
 	float scale = 1.0f / M_;
 	int exponent = -1;
 
-	printf("Construct Simple_LSH Data\n\n");
 	simple_lsh_data_ = new float*[n_pts_];
 	for (int i = 0; i < n_pts_; ++i) {
 		simple_lsh_data_[i] = new float[simple_lsh_dim_];
@@ -93,22 +86,22 @@ int Simple_LSH::bulkload()			// bulkloading
 	// -------------------------------------------------------------------------
 	//  indexing the new data using SRP-LSH
 	// -------------------------------------------------------------------------
-	lsh_ = new SRP_LSH(n_pts_, simple_lsh_dim_, K_, 
-		(const float **) simple_lsh_data_);
-
-	return 0;
+	lsh_ = new SRP_LSH(n_pts_, simple_lsh_dim_, K_, (const float **) simple_lsh_data_);
 }
 
 // -----------------------------------------------------------------------------
-void Simple_LSH::display()			// display parameters
+Simple_LSH::~Simple_LSH()			// destructor
 {
-	printf("Parameters of Simple_LSH:\n");
-	printf("    n = %d\n", n_pts_);
-	printf("    d = %d\n", dim_);
-	printf("    K = %d\n", K_);
-	printf("    c = %.2f\n", appr_ratio_);
-	printf("    M = %.2f\n", M_);
-	printf("\n");
+	if (simple_lsh_data_ != NULL) {
+		for (int i = 0; i < n_pts_; ++i) {
+			delete[] simple_lsh_data_[i]; simple_lsh_data_[i] = NULL;
+		}
+		delete[] simple_lsh_data_; simple_lsh_data_ = NULL;
+	}
+
+	if (lsh_ != NULL) {
+		delete lsh_; lsh_ = NULL;
+	}
 }
 
 // -----------------------------------------------------------------------------

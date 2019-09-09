@@ -24,21 +24,22 @@ struct Block {
 };
 
 // -----------------------------------------------------------------------------
-//  H2_ALSH is used to solve the problem of c-Approximate Maximum Inner Product 
-//  (c-AMIP) search
+//  Asymmetric Locality-Sensitive Hashing based on Homocentric Hypersphere 
+//  partition (H2_ALSH) is used to solve the problem of c-Approximate Maximum 
+//  Inner Product (c-AMIP) search
 // -----------------------------------------------------------------------------
 class H2_ALSH {
 public:
-	H2_ALSH();						// default constructor
-	~H2_ALSH();						// destructor
-
-	// -------------------------------------------------------------------------
-	void build(						// build index
+	H2_ALSH(						// constructor
 		int   n,						// number of data objects
 		int   d,						// dimension of data objects
 		float nn_ratio,					// approximation ratio for NN
 		float mip_ratio,				// approximation ratio for MIP
-		const float **data);			// input data
+		FILE  *fp,						// output file pointer
+		const float **data); 			// input data
+
+	// -------------------------------------------------------------------------
+	~H2_ALSH();						// destructor		
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -61,10 +62,7 @@ protected:
 	vector<Block*> blocks_;			// blocks
 	
 	// -------------------------------------------------------------------------
-	int bulkload();					// bulkloading
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
+	void bulkload();				// bulkloading
 };
 
 #endif // __H2_ALSH_H
