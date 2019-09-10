@@ -620,7 +620,6 @@ int h2_alsh_precision_recall(		// precision recall curve of h2_alsh
 		printf("\n");
 		fprintf(fp, "\n");
 	}
-	printf("\n");
 	fprintf(fp, "\n");
 	fclose(fp);
 
@@ -701,7 +700,6 @@ int sign_alsh_precision_recall(		// precision recall curve of sign_alsh
 		printf("\n");
 		fprintf(fp, "\n");
 	}
-	printf("\n");
 	fprintf(fp, "\n");
 	fclose(fp);
 
@@ -780,7 +778,6 @@ int simple_lsh_precision_recall(	// precision recall curve of simple_lsh
 		printf("\n");
 		fprintf(fp, "\n");
 	}
-	printf("\n");
 	fprintf(fp, "\n");
 	fclose(fp);
 

@@ -224,7 +224,7 @@ int get_hits(						// get the number of hits between two ID list
 }
 
 // -----------------------------------------------------------------------------
-int mip_ground_truth(				// find the ground truth MIP results
+int ground_truth(					// find the ground truth MIP results
 	int   n,							// number of data points
 	int   qn,							// number of query points
 	int   d,							// dimension of space

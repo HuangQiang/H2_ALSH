@@ -7,7 +7,7 @@ void usage() 						// display the usage of this package
 		"-------------------------------------------------------------------\n"
 		" Usage of the package for c-Approximate MIP (c-AMIP) search\n"
 		"-------------------------------------------------------------------\n"
-		"    -alg  {integer}  options of algorithms (0 - 13)\n"
+		"    -alg  {integer}  options of algorithms (0 - 11)\n"
 		"    -n    {integer}  cardinality of the dataset\n"
 		"    -d    {integer}  dimensionality of the dataset\n"
 		"    -qn   {integer}  number of queries\n"
@@ -235,8 +235,8 @@ int main(int nargs, char **args)
 			recall[round] = new float[MAX_T];
 
 			for (int t = 0; t < MAX_T; ++t) {
-				pre[round][t]    = 0;
-				recall[round][t] = 0;
+				pre[round][t]    = 0.0f;
+				recall[round][t] = 0.0f;
 			}
 		}
 	}
@@ -246,7 +246,7 @@ int main(int nargs, char **args)
 	// -------------------------------------------------------------------------
 	switch (alg) {
 	case 0:
-		mip_ground_truth(n, qn, d, (const float **) data, 
+		ground_truth(n, qn, d, (const float **) data, 
             (const float **) query, truth_set);
 		break;
 	case 1:
