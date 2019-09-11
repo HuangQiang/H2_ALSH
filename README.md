@@ -41,11 +41,11 @@ Authors
 
 * **Qiang Huang**
 
-  Smart Systems Institute, National University of Singapore (NUS),
+  School of Computing, National University of Singapore (NUS),
   
   Singapore, 119613 
   
-  huangq2011@gmail.com, huangq25@mail2.sysu.edu.cn
+  huangq2011@gmail.com, huangq@comp.nus.edu.sg
   
   https://sites.google.com/site/qianghuang2017/
   
