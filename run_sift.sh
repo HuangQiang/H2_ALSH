@@ -64,5 +64,4 @@ oFolder=./results/${dname}/
 # ------------------------------------------------------------------------------
 #  Norm Distribution
 # ------------------------------------------------------------------------------
-./alsh -alg 11 -n ${n} -qn ${qn} -d ${d} -ds ${dPath}.ds -qs ${dPath}.q \
-    -of ${oFolder}
+./alsh -alg 11 -n ${n} -d ${d} -ds ${dPath}.ds -of ${oFolder}
