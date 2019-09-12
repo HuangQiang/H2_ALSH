@@ -19,7 +19,6 @@ H2_ALSH::H2_ALSH(					// constructor
 	mip_ratio_ = mip_ratio;
 	data_      = data;
 
-	h2_alsh_dim_ = d + 1;
 	b_ = sqrt((pow(nn_ratio_,4.0f) - 1) / (pow(nn_ratio_,4.0f) - mip_ratio_));
 
 	// -------------------------------------------------------------------------
@@ -35,8 +34,8 @@ H2_ALSH::H2_ALSH(					// constructor
 	//  display parameters
 	// -------------------------------------------------------------------------
 	printf("Parameters of H2_ALSH:\n");
-	printf("    n          = %d\n", n_pts_);
-	printf("    d          = %d\n", dim_);
+	printf("    n          = %d\n",   n_pts_);
+	printf("    d          = %d\n",   dim_);
 	printf("    c          = %.2f\n", nn_ratio_);
 	printf("    c0         = %.2f\n", mip_ratio_);
 	printf("    M          = %.2f\n", M_);
@@ -82,21 +81,20 @@ void H2_ALSH::bulkload()			// bulkloading
 
 		while (node_index >= 0) {
 			if (data_count >= MAX_BLOCK_NUM) break;
-			if (data_count >= CANDIDATES && norm[node_index].first < m) {
+
+			int norm_d = norm[node_index].first;
+			int id     = norm[node_index].second;
+			if (data_count >= CANDIDATES && norm_d < m) {
 				break;
 			}
-			int id = norm[node_index].second;
-			h2_alsh_data_[data_index] = new float[h2_alsh_dim_];
 
-			for (int j = 0; j < h2_alsh_dim_; ++j) {
-				if (j < dim_) {
-					h2_alsh_data_[data_index][j] = data_[id][j];
-				}
-				else {
-					h2_alsh_data_[data_index][j] = sqrt(M * M -
-						norm[node_index].first * norm[node_index].first);
-				}
+			float *data = new float[dim_ + 1];
+			for (int i = 0; i < dim_; ++i) {
+				data[i] = data_[id][i];
 			}
+			data[dim_]= sqrt(M * M - norm_d * norm_d);
+			h2_alsh_data_[data_index] = data; 
+
 			--node_index;
 			++data_index;
 			++data_count;
@@ -105,18 +103,20 @@ void H2_ALSH::bulkload()			// bulkloading
 		Block *block = new Block();
 		block->n_pts_ = data_count;
 		block->M_     = M;
-		block->index_ = new int[block->n_pts_];
-		for (int i = 0; i < block->n_pts_; ++i) {
-			block->index_[i] = norm[node_index + data_count - i].second;
+		block->index_ = new int[data_count];
+
+		int base = node_index + data_count;
+		for (int i = 0; i < data_count; ++i) {
+			block->index_[i] = norm[base - i].second;
 		}
 
 		if (data_count > CANDIDATES) {
 			int start_index = data_index - data_count;
-			block->lsh_ = new QALSH(data_count, h2_alsh_dim_, nn_ratio_, 
+			block->lsh_ = new QALSH(data_count, dim_ + 1, nn_ratio_, 
 				(const float **) h2_alsh_data_ + start_index);
 		}
-		num_blocks_++;
 		blocks_.push_back(block);
+		num_blocks_++;
 	}
 }
 
@@ -145,59 +145,57 @@ int H2_ALSH::kmip(					// c-k-AMIP search
 	MaxK_List *list)					// top-k MIP results (return) 
 {
 	// -------------------------------------------------------------------------
-	//  calc the Euclidean norm of input query
+	//  initialize parameters
 	// -------------------------------------------------------------------------
 	float norm_q = sqrt(calc_inner_product(dim_, query, query));
+	int   *index = NULL;
+	Block *block = NULL;
+
+	float *h2_alsh_query = new float[dim_ + 1];
+	MinK_List *nn_list = new MinK_List(top_k);
 
 	// -------------------------------------------------------------------------
 	//  c-k-AMIP search
 	// -------------------------------------------------------------------------
-	float *h2_alsh_query = new float[h2_alsh_dim_];
-	MinK_List *nn_list = new MinK_List(top_k);
+	for (int i = 0; i < num_blocks_; ++i) {
+		block = blocks_[i];
+		index = block->index_;
+		if (block->M_ * norm_q <= list->min_key()) break;
 
-	for (int block_id = 0; block_id < num_blocks_; ++block_id) {
-		float ub = blocks_[block_id]->M_ * norm_q;
-		if (ub <= list->min_key()) break;
-
-		if (blocks_[block_id]->n_pts_ <= CANDIDATES) {
+		int n = block->n_pts_;
+		if (n <= CANDIDATES) {
 			// -----------------------------------------------------------------
 			//  MIP search by linear scan
 			// -----------------------------------------------------------------
-			for (int j = 0; j < blocks_[block_id]->n_pts_; ++j) {
-				int id = blocks_[block_id]->index_[j];
+			for (int j = 0; j < n; ++j) {
+				int   id = index[j];
 				float ip = calc_inner_product(dim_, data_[id], query);
 
 				list->insert(ip, id + 1);
 			}
 		}
 		else {
-			float lambda = blocks_[block_id]->M_ / norm_q;
-			for (int i = 0; i < h2_alsh_dim_; ++i) {
-				if (i < dim_) h2_alsh_query[i] = lambda * query[i];
-				else h2_alsh_query[i] = 0.0f;
+			float lambda = block->M_ / norm_q;
+			for (int j = 0; j < dim_; ++j) {
+				h2_alsh_query[j] = lambda * query[j];
 			}
+			h2_alsh_query[dim_] = 0.0f;
 
 			// -----------------------------------------------------------------
 			//  conduct c-k-ANN search by qalsh
 			// -----------------------------------------------------------------
 			nn_list->reset();
-
-			float R = 2.0f * blocks_[block_id]->M_ * blocks_[block_id]->M_;
-			R -= 2.0f * lambda * list->min_key();
-			R = sqrt(R);
-			
-			blocks_[block_id]->lsh_->knn(top_k, R, (const float *) h2_alsh_query, 
-				nn_list);
+			float R = sqrt(2.0f * (block->M_*block->M_ - lambda*list->min_key()));
+			block->lsh_->knn(top_k, R, (const float *) h2_alsh_query, nn_list);
 
 			// -----------------------------------------------------------------
 			//  compute inner product for the candidates returned by qalsh
 			// -----------------------------------------------------------------
 			int size = (int) nn_list->size();
-			for (int i = 0; i < size; ++i) {
-				int nn_id = nn_list->ith_id(i);
-
-				int id = blocks_[block_id]->index_[nn_id];
+			for (int j = 0; j < size; ++j) {
+				int   id = index[nn_list->ith_id(j)];
 				float ip = calc_inner_product(dim_, data_[id], query);
+				
 				list->insert(ip, id + 1);
 			}
 		}

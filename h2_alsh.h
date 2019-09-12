@@ -56,7 +56,6 @@ protected:
 
 	float b_;						// compression ratio
 	float M_;						// max norm of the data objects
-	int   h2_alsh_dim_;				// dimension of h2_alsh data (dim_ + 1)
 	float **h2_alsh_data_;			// h2_alsh data
 	int   num_blocks_;				// number of blocks
 	vector<Block*> blocks_;			// blocks
