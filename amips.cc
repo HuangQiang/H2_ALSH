@@ -10,13 +10,13 @@ int h2_alsh(						// mip search via h2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sh2_alsh.out", output_folder);
+	sprintf(output_set, "%sh2_alsh.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -84,13 +84,13 @@ int l2_alsh(						// mip search via l2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sl2_alsh.out", output_folder);
+	sprintf(output_set, "%sl2_alsh.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -158,13 +158,13 @@ int l2_alsh2(						// mip search via l2_alsh2
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sl2_alsh2.out", output_folder);
+	sprintf(output_set, "%sl2_alsh2.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -230,13 +230,13 @@ int xbox(							// mip search via xbox
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sxbox.out", output_folder);
+	sprintf(output_set, "%sxbox.out", out_path);
 	
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -288,7 +288,7 @@ int xbox(							// mip search via xbox
 	// -------------------------------------------------------------------------
 	//  c-AMIP search via H2-ALSH-
 	// -------------------------------------------------------------------------	
-	sprintf(output_set, "%sh2_alsh_minus.out", output_folder);
+	sprintf(output_set, "%sh2_alsh_minus.out", out_path);
 	fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
@@ -352,13 +352,13 @@ int sign_alsh(						// mip search via sign_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%ssign_alsh.out", output_folder);
+	sprintf(output_set, "%ssign_alsh.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -425,13 +425,13 @@ int simple_lsh(						// mip search via simple_lsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%ssimple_lsh.out", output_folder);
+	sprintf(output_set, "%ssimple_lsh.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -496,13 +496,13 @@ int linear_scan(					// find top-k mip using linear_scan
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  c-AMIP search via linear scan
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%slinear.out", output_folder);
+	sprintf(output_set, "%slinear.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -565,14 +565,14 @@ int h2_alsh_precision_recall(		// precision recall curve of h2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	gettimeofday(&g_start_time, NULL);
 	char output_set[200];
-	sprintf(output_set, "%sh2_alsh_precision_recall.out", output_folder);
+	sprintf(output_set, "%sh2_alsh_precision_recall.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -645,14 +645,14 @@ int sign_alsh_precision_recall(		// precision recall curve of sign_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	gettimeofday(&g_start_time, NULL);
 	char output_set[200];
-	sprintf(output_set, "%ssign_alsh_precision_recall.out", output_folder);
+	sprintf(output_set, "%ssign_alsh_precision_recall.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -723,14 +723,14 @@ int simple_lsh_precision_recall(	// precision recall curve of simple_lsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder)			// output folder
+	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	gettimeofday(&g_start_time, NULL);
 	char output_set[200];
-	sprintf(output_set, "%ssimple_lsh_precision_recall.out", output_folder);
+	sprintf(output_set, "%ssimple_lsh_precision_recall.out", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {

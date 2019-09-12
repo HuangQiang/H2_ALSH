@@ -89,7 +89,7 @@ int norm_distribution(				// analyse norm distribution of data
 	int   n,							// number of data points
 	int   d,							// dimension of space
 	const float **data,					// data set
-	const char  *output_folder);		// output folder
+	const char  *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int ground_truth(					// find the ground truth MIP results
@@ -99,7 +99,5 @@ int ground_truth(					// find the ground truth MIP results
 	const float **data,					// data set
 	const float **query,				// query set
 	const char  *truth_set);			// address of truth set
-
-
 
 #endif // __UTIL_H

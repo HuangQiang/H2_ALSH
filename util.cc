@@ -276,7 +276,7 @@ int norm_distribution(				// analyse norm distribution of data
 	int   n,							// number of data points
 	int   d,							// dimension of space
 	const float **data,					// data set
-	const char  *output_folder) 		// output folder
+	const char  *out_path) 				// output path
 {
 	// -------------------------------------------------------------------------
 	//  calc norm for all data objects
@@ -309,7 +309,7 @@ int norm_distribution(				// analyse norm distribution of data
 	//  write norm distribution
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%snorm_distribution.out", output_folder);
+	sprintf(output_set, "%snorm_distribution.out", out_path);
 
 	FILE *fp = fopen(output_set, "w");
 	if (!fp) {

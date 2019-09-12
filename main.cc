@@ -19,7 +19,7 @@ void usage() 						// display the usage of this package
 		"    -ds   {string}   address of the data  set\n"
 		"    -qs   {string}   address of the query set\n"
 		"    -ts   {string}   address of the truth set\n"
-		"    -of   {string}   output folder\n"
+		"    -op   {string}   output path\n"
 		"\n"
 		"-------------------------------------------------------------------\n"
 		" The options of algorithms are:\n"
@@ -28,37 +28,37 @@ void usage() 						// display the usage of this package
 		"         Parameters: -alg 0 -n -qn -d -ds -qs -ts\n"
 		"\n"
 		"    1  - AMIP search by H2_ALSH\n"
-		"         Parameters: -alg 1 -n -qn -d -c0 -c -ds -qs -ts -of\n"
+		"         Parameters: -alg 1 -n -qn -d -c0 -c -ds -qs -ts -op\n"
 		"\n"
 		"    2  - AMIP search by L2_ALSH\n"
-		"         Parameters: -alg 2 -n -qn -d -m -U -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 2 -n -qn -d -m -U -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    3  - AMIP search by L2_ALSH2\n"
-		"         Parameters: -alg 3 -n -qn -d -m -U -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 3 -n -qn -d -m -U -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    4  - AMIP search by XBOX and H2-ALSH-\n"
-		"         Parameters: -alg 4 -n -qn -d -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 4 -n -qn -d -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    5  - AMIP search by Sign_ALSH\n"
-		"         Parameters: -alg 5 -n -qn -d -K -m -U -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 5 -n -qn -d -K -m -U -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    6  - AMIP search by Simple_LSH\n"
-		"         Parameters: -alg 6 -n -qn -d -K -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 6 -n -qn -d -K -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    7  - MIP search by Linear_Scan\n"
-		"         Parameters: -alg 7 -n -qn -d -B -qs -ts -df -of\n"
+		"         Parameters: -alg 7 -n -qn -d -B -qs -ts -df -op\n"
 		"\n"
 		"    8  - Precision-Recall Curve of AMIP search by H2_ALSH\n"
-		"         Parameters: -alg 8 -n -qn -d -c0 -c -ds -qs -ts -of\n"
+		"         Parameters: -alg 8 -n -qn -d -c0 -c -ds -qs -ts -op\n"
 		"\n"
 		"    9  - Precision-Recall Curve of AMIP search by Sign_ALSH\n"
-		"         Parameters: -alg 9 -n -qn -d -K -m -U -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 9 -n -qn -d -K -m -U -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    10 - Precision-Recall Curve of AMIP search by Simple_LSH\n"
-		"         Parameters: -alg 10 -n -qn -d -K -c0 -ds -qs -ts -of\n"
+		"         Parameters: -alg 10 -n -qn -d -K -c0 -ds -qs -ts -op\n"
 		"\n"
 		"    11 - Norm Distributiuon\n"
-		"         Parameters: -alg 11 -n -d -ds -of\n"
+		"         Parameters: -alg 11 -n -d -ds -op\n"
 		"\n"
 		"-------------------------------------------------------------------\n"
 		" Authors: Qiang Huang (huangq2011@gmail.com)                       \n"
@@ -86,7 +86,7 @@ int main(int nargs, char **args)
 	char   data_set[200];			// address of data set
 	char   query_set[200];			// address of query set
 	char   truth_set[200];			// address of ground truth file
-	char   output_folder[200];		// output folder
+	char   out_path[200];			// output path
 
 	float  **pre     = NULL;		// precision array
 	float  **recall  = NULL;		// recall array
@@ -99,7 +99,7 @@ int main(int nargs, char **args)
 	while (cnt < nargs && !failed) {
 		if (strcmp(args[cnt], "-alg") == 0) {
 			alg = atoi(args[++cnt]);
-			printf("alg           = %d\n", alg);
+			printf("alg       = %d\n", alg);
 			if (alg < 0 || alg > 11) {
 				failed = true;
 				break;
@@ -107,7 +107,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-n") == 0) {
 			n = atoi(args[++cnt]);
-			printf("n             = %d\n", n);
+			printf("n         = %d\n", n);
 			if (n <= 0) {
 				failed = true;
 				break;
@@ -115,7 +115,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-d") == 0) {
 			d = atoi(args[++cnt]);
-			printf("d             = %d\n", d);
+			printf("d         = %d\n", d);
 			if (d <= 0) {
 				failed = true;
 				break;
@@ -123,7 +123,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-qn") == 0) {
 			qn = atoi(args[++cnt]);
-			printf("qn            = %d\n", qn);
+			printf("qn        = %d\n", qn);
 			if (qn <= 0) {
 				failed = true;
 				break;
@@ -131,7 +131,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-K") == 0) {
 			K = atoi(args[++cnt]);
-			printf("K             = %d\n", K);
+			printf("K         = %d\n", K);
 			if (K <= 0) {
 				failed = true;
 				break;
@@ -139,7 +139,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-m") == 0) {
 			m = atoi(args[++cnt]);
-			printf("m             = %d\n", m);
+			printf("m         = %d\n", m);
 			if (m <= 0) {
 				failed = true;
 				break;
@@ -147,7 +147,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-U") == 0) {
 			U = (float) atof(args[++cnt]);
-			printf("U             = %.2f\n", U);
+			printf("U         = %.2f\n", U);
 			if (U <= 0.0f || U > 1.0f) {
 				failed = true;
 				break;
@@ -155,7 +155,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-c0") == 0) {
 			nn_ratio = (float) atof(args[++cnt]);
-			printf("c0            = %.2f\n", nn_ratio);
+			printf("c0        = %.2f\n", nn_ratio);
 			if (nn_ratio <= 1.0f) {
 				failed = true;
 				break;
@@ -163,7 +163,7 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-c") == 0) {
 			mip_ratio = (float) atof(args[++cnt]);
-			printf("c             = %.2f\n", mip_ratio);
+			printf("c         = %.2f\n", mip_ratio);
 			if (mip_ratio <= 0.0f || mip_ratio >= 1.0f) {
 				failed = true;
 				break;
@@ -171,26 +171,26 @@ int main(int nargs, char **args)
 		}
 		else if (strcmp(args[cnt], "-ds") == 0) {
 			strncpy(data_set, args[++cnt], sizeof(data_set));
-			printf("data_set      = %s\n", data_set);
+			printf("data_set  = %s\n", data_set);
 		}
 		else if (strcmp(args[cnt], "-qs") == 0) {
 			strncpy(query_set, args[++cnt], sizeof(query_set));
-			printf("query_set     = %s\n", query_set);
+			printf("query_set = %s\n", query_set);
 		}
 		else if (strcmp(args[cnt], "-ts") == 0) {
 			strncpy(truth_set, args[++cnt], sizeof(truth_set));
-			printf("truth_set     = %s\n", truth_set);
+			printf("truth_set = %s\n", truth_set);
 		}
-		else if (strcmp(args[cnt], "-of") == 0) {
-			strncpy(output_folder, args[++cnt], sizeof(output_folder));
-			printf("output_folder = %s\n", output_folder);
+		else if (strcmp(args[cnt], "-op") == 0) {
+			strncpy(out_path, args[++cnt], sizeof(out_path));
+			printf("out_path  = %s\n", out_path);
 
-			int len = (int) strlen(output_folder);
-			if (output_folder[len - 1] != '/') {
-				output_folder[len] = '/';
-				output_folder[len + 1] = '\0';
+			int len = (int) strlen(out_path);
+			if (out_path[len - 1] != '/') {
+				out_path[len] = '/';
+				out_path[len + 1] = '\0';
 			}
-			create_dir(output_folder);
+			create_dir(out_path);
 		}
 		else {
 			failed = true;
@@ -251,49 +251,49 @@ int main(int nargs, char **args)
 		break;
 	case 1:
 		h2_alsh(n, qn, d, nn_ratio, mip_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, output_folder);
+			(const float **) query, (const Result **) R, out_path);
 		break;
 	case 2:
 		l2_alsh(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, output_folder);
+			(const float **) query, (const Result **) R, out_path);
 		break;
 	case 3:
 		l2_alsh2(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, output_folder);
+			(const float **) query, (const Result **) R, out_path);
 		break;
 	case 4:
 		xbox(n, qn, d, nn_ratio, (const float **) data, (const float **) query, 
-			(const Result **) R, output_folder);
+			(const Result **) R, out_path);
 		break;
 	case 5:
 		sign_alsh(n, qn, d, K, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, output_folder);
+			(const float **) query, (const Result **) R, out_path);
 		break;
 	case 6:
 		simple_lsh(n, qn, d, K, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, output_folder);
+			(const float **) query, (const Result **) R, out_path);
 		break;
 	case 7:
 		linear_scan(n, qn, d, (const float **) data, (const float **) query,
-			(const Result **) R, output_folder);
+			(const Result **) R, out_path);
 		break;
 	case 8:
 		h2_alsh_precision_recall(n, qn, d, nn_ratio, mip_ratio, pre, recall, 
 			(const float **) data, (const float **) query, 
-			(const Result **) R, output_folder);
+			(const Result **) R, out_path);
 		break;
 	case 9:
 		sign_alsh_precision_recall(n, qn, d, K, m, U, nn_ratio, pre, recall, 
 			(const float **) data, (const float **) query, 
-			(const Result **) R, output_folder);
+			(const Result **) R, out_path);
 		break;
 	case 10:
 		simple_lsh_precision_recall(n, qn, d, K, nn_ratio, pre, recall, 
 			(const float **) data, (const float **) query, 
-			(const Result **) R, output_folder);
+			(const Result **) R, out_path);
 		break;
 	case 11:
-		norm_distribution(n, d, (const float **) data, output_folder);
+		norm_distribution(n, d, (const float **) data, out_path);
 		break;
 	default:
 		printf("Parameters error!\n");

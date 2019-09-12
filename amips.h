@@ -13,7 +13,7 @@ int h2_alsh(						// c-AMIP search via h2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int l2_alsh(						// c-AMIP search via l2_alsh
@@ -26,7 +26,7 @@ int l2_alsh(						// c-AMIP search via l2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int l2_alsh2(						// c-AMIP search via l2_alsh2
@@ -39,7 +39,7 @@ int l2_alsh2(						// c-AMIP search via l2_alsh2
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int xbox(							// c-AMIP search via xbox
@@ -50,7 +50,7 @@ int xbox(							// c-AMIP search via xbox
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int sign_alsh(						// c-AMIP search via sign_alsh
@@ -64,7 +64,7 @@ int sign_alsh(						// c-AMIP search via sign_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int simple_lsh(						// c-AMIP search via simple_lsh
@@ -76,7 +76,7 @@ int simple_lsh(						// c-AMIP search via simple_lsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int linear_scan(					// find top-k mip using linear_scan
@@ -86,7 +86,7 @@ int linear_scan(					// find top-k mip using linear_scan
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision recall curve of h2_alsh
@@ -100,7 +100,7 @@ int h2_alsh_precision_recall(		// precision recall curve of h2_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int sign_alsh_precision_recall(		// precision recall curve of sign_alsh
@@ -116,7 +116,7 @@ int sign_alsh_precision_recall(		// precision recall curve of sign_alsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 // -----------------------------------------------------------------------------
 int simple_lsh_precision_recall(	// precision recall curve of simple_lsh
@@ -130,7 +130,7 @@ int simple_lsh_precision_recall(	// precision recall curve of simple_lsh
 	const float **data,					// data set
 	const float **query,				// query set
 	const Result **R,					// truth set
-	const char *output_folder);			// output folder
+	const char *out_path);				// output path
 
 
 #endif // __AMIP_H

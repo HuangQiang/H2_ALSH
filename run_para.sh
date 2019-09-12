@@ -19,10 +19,10 @@ do
     n=1000000
     d=128
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c=${c}/
+    oPath=${resultPath}/${dname}/para/c=${c}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Gist
@@ -31,10 +31,10 @@ do
     n=1000000
     d=960
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c=${c}/
+    oPath=${resultPath}/${dname}/para/c=${c}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Netflix
@@ -43,10 +43,10 @@ do
     n=17770
     d=300
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c=${c}/
+    oPath=${resultPath}/${dname}/para/c=${c}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Yahoo
@@ -55,10 +55,10 @@ do
     n=624961
     d=300
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c=${c}/
+    oPath=${resultPath}/${dname}/para/c=${c}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 done
 
 # ------------------------------------------------------------------------------
@@ -74,10 +74,10 @@ do
     n=1000000
     d=128
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c0=${c0}/
+    oPath=${resultPath}/${dname}/para/c0=${c0}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Gist
@@ -86,10 +86,10 @@ do
     n=1000000
     d=960
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c0=${c0}/
+    oPath=${resultPath}/${dname}/para/c0=${c0}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Netflix
@@ -98,10 +98,10 @@ do
     n=17770
     d=300
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c0=${c0}/
+    oPath=${resultPath}/${dname}/para/c0=${c0}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
     # --------------------------------------------------------------------------
     #  Yahoo
@@ -110,8 +110,8 @@ do
     n=624961
     d=300
     dPath=${dataPath}/${dname}/${dname}
-    oFolder=${resultPath}/${dname}/para/c0=${c0}/
+    oPath=${resultPath}/${dname}/para/c0=${c0}/
 
     ./alsh -alg 1 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-        -qs ${dPath}.q -ts ${dPath}.mip -of ${oFolder}
+        -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 done
