@@ -195,7 +195,7 @@ int QALSH::knn(						// c-k-ANN search
 				while (count < SCAN_SIZE) {
 					ldist = MAXREAL;
 					if (lpos_[j] >= 0) {
-						ldist = abs(q_val_[j] - tables_[j][lpos_[j]].key_);
+						ldist = fabs(q_val_[j] - tables_[j][lpos_[j]].key_);
 					}
 					if (ldist > bucket_width) break;
 					if (ldist > range) break;
@@ -220,7 +220,7 @@ int QALSH::knn(						// c-k-ANN search
 				while (count < SCAN_SIZE) {
 					rdist = MAXREAL;
 					if (rpos_[j] < n_pts_) {
-						rdist = abs(q_val_[j] - tables_[j][rpos_[j]].key_);
+						rdist = fabs(q_val_[j] - tables_[j][rpos_[j]].key_);
 					}
 					if (rdist > bucket_width) break;
 					if (rdist > range) break;					
