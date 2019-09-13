@@ -56,18 +56,9 @@ protected:
 	float  *q_val_;					// hash value of query
 
 	// -------------------------------------------------------------------------
-	void calc_params();				// calc parameters
-
-	// -------------------------------------------------------------------------
 	float calc_p(					// calc probability
 		float x);						// x = w / (2.0 * r)
-
-	// -------------------------------------------------------------------------
-	void gen_hash_func();			// generate hash functions
-
-	// -------------------------------------------------------------------------
-	void bulkload();				// build hash tables
-
+		
 	// -------------------------------------------------------------------------
 	float calc_hash_value(			// calc hash value
 		int   table_id,					// table id
