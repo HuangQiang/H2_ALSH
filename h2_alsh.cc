@@ -19,8 +19,6 @@ H2_ALSH::H2_ALSH(					// constructor
 	mip_ratio_ = mip_ratio;
 	data_      = data;
 
-	b_ = sqrt((pow(nn_ratio_,4.0f) - 1) / (pow(nn_ratio_,4.0f) - mip_ratio_));
-
 	// -------------------------------------------------------------------------
 	//  build index
 	// -------------------------------------------------------------------------
@@ -60,10 +58,12 @@ void H2_ALSH::bulkload()			// bulkloading
 	vector<pair<float, int> > norm(n_pts_);
 	for (int i = 0; i < n_pts_; ++i) {
 		norm[i].second = i;			// data object id
-		norm[i].first  = sqrt(calc_inner_product(dim_, data_[i], data_[i]));
+		norm[i].first  = calc_inner_product(dim_, data_[i], data_[i]);
 	}
 	sort(norm.begin(), norm.end());
-	M_ = norm[n_pts_ - 1].first;
+
+	M_ = sqrt(norm[n_pts_ - 1].first);
+	b_ = (pow(nn_ratio_,4.0f) - 1) / (pow(nn_ratio_,4.0f) - mip_ratio_);
 
 	// -------------------------------------------------------------------------
 	//  construct new data
@@ -92,7 +92,7 @@ void H2_ALSH::bulkload()			// bulkloading
 			for (int i = 0; i < dim_; ++i) {
 				data[i] = data_[id][i];
 			}
-			data[dim_]= sqrt(M * M - norm_d * norm_d);
+			data[dim_]= sqrt(M - norm_d);
 			h2_alsh_data_[data_index] = data; 
 
 			--node_index;
@@ -102,7 +102,7 @@ void H2_ALSH::bulkload()			// bulkloading
 
 		Block *block = new Block();
 		block->n_pts_ = data_count;
-		block->M_     = M;
+		block->M_     = sqrt(M);
 		block->index_ = new int[data_count];
 
 		int base = node_index + data_count;
