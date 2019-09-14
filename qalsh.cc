@@ -196,8 +196,7 @@ int QALSH::knn(						// c-k-ANN search
 					if (lpos_[j] >= 0) {
 						ldist = fabs(q_val_[j] - tables_[j][lpos_[j]].key_);
 					}
-					if (ldist > bucket_width) break;
-					if (ldist > range) break;
+					if (ldist > bucket_width || ldist > range) break;
 
 					int id = tables_[j][lpos_[j]].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
@@ -205,12 +204,12 @@ int QALSH::knn(						// c-k-ANN search
 						float dist = calc_l2_sqr(dim_, kdist, data_[id], query);
 						kdist =  list->insert(dist, id);
 
-						if (++dist_cnt > candidates) break;
+						if (++dist_cnt >= candidates) break;
 					}
 					--lpos_[j];
 					++count;
 				}
-				if (dist_cnt > candidates) break;
+				if (dist_cnt >= candidates) break;
 
 				// -------------------------------------------------------------
 				//  step 2.2: scan right part of hash table
@@ -221,8 +220,7 @@ int QALSH::knn(						// c-k-ANN search
 					if (rpos_[j] < n_pts_) {
 						rdist = fabs(q_val_[j] - tables_[j][rpos_[j]].key_);
 					}
-					if (rdist > bucket_width) break;
-					if (rdist > range) break;					
+					if (rdist > bucket_width || rdist > range) break;				
 
 					int id = tables_[j][rpos_[j]].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
@@ -230,7 +228,7 @@ int QALSH::knn(						// c-k-ANN search
 						float dist = calc_l2_sqr(dim_, kdist, data_[id], query);
 						kdist =  list->insert(dist, id);
 
-						if (++dist_cnt > candidates) break;
+						if (++dist_cnt >= candidates) break;
 					}
 					++rpos_[j];
 					++count;
