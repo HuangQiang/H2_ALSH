@@ -56,18 +56,7 @@ float calc_inner_product(			// calc inner product
 // -----------------------------------------------------------------------------
 float calc_l2_sqr(					// calc L2 square distance
 	int   dim,							// dimension
-	const float *p1,					// 1st point
-	const float *p2);					// 2nd point
-
-// -----------------------------------------------------------------------------
-float calc_l2_dist(					// calc L2 distance
-	int   dim,							// dimension
-	const float *p1,					// 1st point
-	const float *p2);					// 2nd point
-
-// -----------------------------------------------------------------------------
-float calc_l1_dist(					// calc L1 distance
-	int   dim,							// dimension
+	float threshold,					// threshold
 	const float *p1,					// 1st point
 	const float *p2);					// 2nd point
 

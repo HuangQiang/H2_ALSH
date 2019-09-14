@@ -152,7 +152,7 @@ float calc_inner_product(			// calc inner product
 {
 	float ret = 0.0f;
 	for (int i = 0; i < dim; ++i) {
-		ret += (p1[i] * p2[i]);
+		ret += p1[i] * p2[i];
 	}
 	return ret;
 }
@@ -160,38 +160,53 @@ float calc_inner_product(			// calc inner product
 // -----------------------------------------------------------------------------
 float calc_l2_sqr(					// calc L2 square distance
 	int   dim,							// dimension
+	float threshold,					// threshold
 	const float *p1,					// 1st point
 	const float *p2)					// 2nd point
 {
-	float diff = 0.0f;
-	float ret  = 0.0f;
-	for (int i = 0; i < dim; ++i) {
-		diff = p1[i] - p2[i];
-		ret += diff * diff;
-	}
-	return ret;
-}
+	unsigned d = dim & ~unsigned(7);
+	const float *aa = p1, *end_a = aa + d;
+	const float *bb = p2, *end_b = bb + d;
 
-// -----------------------------------------------------------------------------
-float calc_l2_dist(					// calc L2 distance
-	int   dim,							// dimension
-	const float *p1,					// 1st point
-	const float *p2)					// 2nd point
-{
-	return sqrt(calc_l2_sqr(dim, p1, p2));
-}
+	float r = 0.0f;
+	float r0, r1, r2, r3, r4, r5, r6, r7;
 
-// -----------------------------------------------------------------------------
-float calc_l1_dist(					// calc L1 distance
-	int   dim,							// dimension
-	const float *p1,					// 1st point
-	const float *p2)					// 2nd point
-{
-	float ret = 0.0f;
-	for (int i = 0; i < dim; ++i) {
-		ret += fabs(p1[i] - p2[i]);
+	const float *a = end_a, *b = end_b;
+
+	r0 = r1 = r2 = r3 = r4 = r5 = r6 = r7 = 0.0f;
+	switch (dim & 7) {
+		case 7: r6 = SQR(a[6] - b[6]);
+		case 6: r5 = SQR(a[5] - b[5]);
+		case 5: r4 = SQR(a[4] - b[4]);
+		case 4: r3 = SQR(a[3] - b[3]);
+		case 3: r2 = SQR(a[2] - b[2]);
+		case 2: r1 = SQR(a[1] - b[1]);
+		case 1: r0 = SQR(a[0] - b[0]);
 	}
-	return ret;
+
+	a = aa; b = bb;
+	for (; a < end_a; a += 8, b += 8) {
+		r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+		if (r > threshold) return r;
+
+		r0 = SQR(a[0] - b[0]);
+		r1 = SQR(a[1] - b[1]);
+		r2 = SQR(a[2] - b[2]);
+		r3 = SQR(a[3] - b[3]);
+		r4 = SQR(a[4] - b[4]);
+		r5 = SQR(a[5] - b[5]);
+		r6 = SQR(a[6] - b[6]);
+		r7 = SQR(a[7] - b[7]);
+	}
+	r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+	
+	return r;
+
+	// float ret  = 0.0f;
+	// for (int i = 0; i < dim; ++i) {
+	// 	ret += SQR(p1[i] - p2[i]);
+	// }
+	// return ret;
 }
 
 // -----------------------------------------------------------------------------

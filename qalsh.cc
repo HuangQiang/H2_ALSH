@@ -17,10 +17,9 @@ QALSH::QALSH(						// constructor
 	beta_       = (float) CANDIDATES / (float) n_pts_;
 	delta_      = 1.0f / E;
 
-	w_  = sqrt((8.0f * appr_ratio_ * appr_ratio_ * log(appr_ratio_))
-			/ (appr_ratio_ * appr_ratio_ - 1.0f));
+	w_  = sqrt((8.0f * ratio * ratio * log(ratio)) / (ratio * ratio - 1.0f));
 	p1_ = calc_p(w_ / 2.0f);
-	p2_ = calc_p(w_ / (2.0f * appr_ratio_));
+	p2_ = calc_p(w_ / (2.0f * ratio));
 
 	float para1 = sqrt(log(2.0f / beta_));
 	float para2 = sqrt(log(1.0f / delta_));
@@ -50,8 +49,8 @@ QALSH::QALSH(						// constructor
 	bucket_flag_ = new bool[m_];
 	range_flag_  = new bool[m_];
 	q_val_       = new float[m_];
-
 	tables_      = new Result*[m_];
+
 	for (int i = 0; i < m_; ++i) {
 		tables_[i] = new Result[n_pts_];
 		for (int j = 0; j < n_pts_; ++j) {
@@ -66,14 +65,14 @@ QALSH::QALSH(						// constructor
 // -----------------------------------------------------------------------------
 QALSH::~QALSH()						// destructor
 {
-	delete[] a_array_;     a_array_ = NULL;
-	delete[] freq_;        freq_ = NULL;
-	delete[] lpos_;        lpos_ = NULL;
-	delete[] rpos_;        rpos_ = NULL;
-	delete[] checked_;     checked_ = NULL;
+	delete[] a_array_;     a_array_     = NULL;
+	delete[] freq_;        freq_        = NULL;
+	delete[] lpos_;        lpos_        = NULL;
+	delete[] rpos_;        rpos_        = NULL;
+	delete[] checked_;     checked_     = NULL;
 	delete[] bucket_flag_; bucket_flag_ = NULL;
-	delete[] range_flag_;  range_flag_ = NULL;
-	delete[] q_val_;       q_val_ = NULL;
+	delete[] range_flag_;  range_flag_  = NULL;
+	delete[] q_val_;       q_val_       = NULL;
 	
 	for (int i = 0; i < m_; ++i) {
 		delete[] tables_[i]; tables_[i] = NULL;
@@ -125,8 +124,8 @@ int QALSH::knn(						// c-k-ANN search
 	const float *query,					// input query
 	MinK_List *list)					// top-k NN results (return)
 {
-	int   candidates = CANDIDATES + top_k - 1; // candidate size
-	float knn_dist   = MAXREAL;		// k-th ANN distance
+	int candidates = CANDIDATES + top_k - 1; // candidate size
+	float kdist = MAXREAL;			// k-th ANN distance
 
 	// -------------------------------------------------------------------------
 	//  linear scan if the number of data is small enough
@@ -134,8 +133,8 @@ int QALSH::knn(						// c-k-ANN search
 	if (candidates >= n_pts_) {
 		float dist = -1.0f;
 		for (int i = 0; i < n_pts_; ++i) {
-			dist = calc_l2_sqr(dim_, data_[i], query);
-			list->insert(dist, i);
+			dist = calc_l2_sqr(dim_, kdist, data_[i], query);
+			kdist = list->insert(dist, i);
 		}
 		return n_pts_;
 	}
@@ -203,8 +202,8 @@ int QALSH::knn(						// c-k-ANN search
 					int id = tables_[j][lpos_[j]].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
 						checked_[id] = true;
-						float dist = calc_l2_sqr(dim_, data_[id], query);
-						knn_dist = list->insert(dist, id);
+						float dist = calc_l2_sqr(dim_, kdist, data_[id], query);
+						kdist =  list->insert(dist, id);
 
 						if (++dist_cnt > candidates) break;
 					}
@@ -228,8 +227,8 @@ int QALSH::knn(						// c-k-ANN search
 					int id = tables_[j][rpos_[j]].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
 						checked_[id] = true;
-						float dist = calc_l2_sqr(dim_, data_[id], query);
-						knn_dist = list->insert(dist, id);
+						float dist = calc_l2_sqr(dim_, kdist, data_[id], query);
+						kdist =  list->insert(dist, id);
 
 						if (++dist_cnt > candidates) break;
 					}
@@ -260,7 +259,7 @@ int QALSH::knn(						// c-k-ANN search
 		// ---------------------------------------------------------------------
 		//  step 3: stop condition T1 and T2
 		// ---------------------------------------------------------------------
-		if (sqrt(knn_dist) < appr_ratio_ * radius) break;
+		if (sqrt(kdist) <  appr_ratio_ * radius) break;
 		if (num_range >= m_ || dist_cnt >= candidates) break;
 
 		// ---------------------------------------------------------------------
@@ -289,7 +288,7 @@ int QALSH::binary_search_pos(		// binary search position
 		if (tables_[table_id][mid].key_ < value) left = mid;
 		else right = mid - 1;
 	}
-	assert(left >= 0 && left < n_pts_);
+	// assert(left >= 0 && left < n_pts_);
 
 	return left;
 }
