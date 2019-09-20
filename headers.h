@@ -39,9 +39,10 @@
 #include "l2_alsh.h"
 #include "l2_alsh2.h"
 #include "xbox.h"
-#include "h2_alsh.h"
 #include "sign_alsh.h"
 #include "simple_lsh.h"
+#include "h2_alsh.h"
 #include "amips.h"
+#include "pre_recall.h"
 
 using namespace std;

@@ -22,7 +22,7 @@ class XBox {
 public:
 	XBox(							// default constructor
 		int   n,						// number of data objects
-		int   d,						// dimension of data objects
+		int   d,						// dimensionality
 		float ratio,					// approximation ratio
 		FILE  *fp,						// output file pointer
 		const float** data);			// original data objects
@@ -39,13 +39,12 @@ public:
 
 protected:
 	int   n_pts_;					// number of data objects
-	int   dim_;						// dimension of data objects
-	float appr_ratio_;				// approximation ratio for ANN search
+	int   dim_;						// dimensionality
+	float nn_ratio_;				// approximation ratio for ANN search
 	const float **data_;			// data objects
 
-	int   xbox_dim_;				// dimension of xbox data (dim_ + 1)
-	float **xbox_data_;				// xbox data
 	float M_;						// max norm of data objects
+	float **xbox_data_;				// xbox data
 	QALSH *lsh_;					// qalsh
 
 	// -------------------------------------------------------------------------

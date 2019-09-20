@@ -16,12 +16,15 @@ class QALSH {
 public:
 	QALSH(							// constructor
 		int   n,						// number of data objects
-		int   d,						// dimension of data objects
+		int   d,						// dimensionality
 		float ratio,					// approximation ratio
 		const float **data);			// data objects
 
 	// -------------------------------------------------------------------------
 	~QALSH();						// destructor
+
+	// -------------------------------------------------------------------------
+	void display();					// display parameters
 
 	// -------------------------------------------------------------------------
 	int knn(						// c-k-ANN search
@@ -32,7 +35,7 @@ public:
 
 protected:
 	int    n_pts_;					// number of data objects
-	int    dim_;					// dimension of data objects
+	int    dim_;					// dimensionality
 	float  appr_ratio_;				// approximation ratio
 	const  float **data_;			// data objects
 
@@ -44,7 +47,7 @@ protected:
 	float  delta_;					// error probability
 	int    m_;						// number of hash tables
 	int    l_;						// collision threshold
-	float  *a_array_;				// lsh functions
+	float  **a_;					// lsh functions
 	Result **tables_;				// hash tables
 
 	int    *freq_;					// frequency		
@@ -58,19 +61,6 @@ protected:
 	// -------------------------------------------------------------------------
 	float calc_p(					// calc probability
 		float x);						// x = w / (2.0 * r)
-		
-	// -------------------------------------------------------------------------
-	float calc_hash_value(			// calc hash value
-		int   table_id,					// table id
-		const float *data);				// input data
-
-	// -------------------------------------------------------------------------
-	void display();					// display parameters
-
-	// -------------------------------------------------------------------------
-	int binary_search_pos(			// binary search hash tables for position
-		int   table_id,					// hash table id
-		float value);					// hash value
 };
 
 #endif // __QALSH_H

@@ -40,10 +40,10 @@ oPath=./results/${dname}/
 ./alsh -alg 4 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -ds ${dPath}.ds \
     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 5 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} -c0 ${c0} \
+./alsh -alg 5 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} \
     -ds ${dPath}.ds -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 6 -n ${n} -qn ${qn} -d ${d} -K ${K} -c0 ${c0} -ds ${dPath}.ds \
+./alsh -alg 6 -n ${n} -qn ${qn} -d ${d} -K ${K} -ds ${dPath}.ds \
     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
 ./alsh -alg 7 -n ${n} -qn ${qn} -d ${d} -ds ${dPath}.ds -qs ${dPath}.q \
@@ -55,10 +55,10 @@ oPath=./results/${dname}/
 ./alsh -alg 8 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 9 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} -c0 ${c0} \
+./alsh -alg 9 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} \
     -ds ${dPath}.ds -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 10 -n ${n} -qn ${qn} -d ${d} -K ${K} -c0 ${c0} -ds ${dPath}.ds \
+./alsh -alg 10 -n ${n} -qn ${qn} -d ${d} -K ${K} -ds ${dPath}.ds \
     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
 # ------------------------------------------------------------------------------

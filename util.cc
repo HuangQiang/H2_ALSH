@@ -1,15 +1,14 @@
 #include "headers.h"
 
-
 timeval g_start_time;
 timeval g_end_time;
 
-float   g_runtime  = -1.0f;
-float   g_ratio    = -1.0f;
-float   g_recall   = -1.0f;
+float g_runtime = -1.0f;
+float g_ratio   = -1.0f;
+float g_recall  = -1.0f;
 
 // -----------------------------------------------------------------------------
-int ResultComp(						// compare function for qsort (ascending)
+int ResultComp(						// cmp func for qsort (ascending)
 	const void *e1,						// 1st element
 	const void *e2)						// 2nd element
 {
@@ -31,7 +30,7 @@ int ResultComp(						// compare function for qsort (ascending)
 }
 
 // -----------------------------------------------------------------------------
-int ResultCompDesc(					// compare function for qsort (descending)
+int ResultCompDesc(					// cmp func for qsort (descending)
 	const void *e1,						// 1st element
 	const void *e2)						// 2nd element
 {
@@ -75,11 +74,12 @@ void create_dir(					// create dir if the path exists
 }
 
 // -----------------------------------------------------------------------------
-int read_data(						// read data/query set from disk
-	int   n,							// number of data/query objects
-	int   d,			 				// dimensionality
-	const char *fname,					// address of data/query set
-	float **data)						// data/query objects (return)
+int read_data(						// read data from disk
+	int   n,							// number of data objects
+	int   d,							// dimensionality
+	const char *fname,					// address of data set
+	float **data,						// data objects (return)
+	float **norm_d) 					// l2-norm of data objects (return)
 {
 	gettimeofday(&g_start_time, NULL);
 	FILE *fp = fopen(fname, "r");
@@ -88,15 +88,28 @@ int read_data(						// read data/query set from disk
 		return 1;
 	}
 
-	int i   = 0;
-	int tmp = -1;
+	int i = 0;
+	int j = 0;
 	while (!feof(fp) && i < n) {
-		fscanf(fp, "%d", &tmp);
-		for (int j = 0; j < d; ++j) {
-			fscanf(fp, " %f", &data[i][j]);
+		float tmp = 0.0f;
+		memset(norm_d[i], 0.0f, NORM_K * SIZEFLOAT);
+
+		fscanf(fp, "%d", &j);
+		for (j = 0; j < d; ++j) {
+			fscanf(fp, " %f", &tmp);
+			data[i][j] = tmp;
+
+			norm_d[i][0] += tmp*tmp;
+			for (int t = 1; t < NORM_K; ++t) {
+				if (j < 8*t)  norm_d[i][t] += tmp*tmp;
+			}
 		}
 		fscanf(fp, "\n");
 
+		for (int t = 1; t < NORM_K; ++t) {
+			norm_d[i][t] = sqrt(norm_d[i][0] - norm_d[i][t]);
+		}
+		norm_d[i][0] = sqrt(norm_d[i][0]);
 		++i;
 	}
 	assert(feof(fp) && i == n);
@@ -158,6 +171,75 @@ float calc_inner_product(			// calc inner product
 }
 
 // -----------------------------------------------------------------------------
+float calc_inner_product(			// calc inner product
+	int   dim,							// dimension
+	float threshold,					// threshold
+	const float *p1,					// 1st point
+	const float *norm1,					// l2-norm of 1st point
+	const float *p2,					// 2nd point
+	const float *norm2) 				// l2-norm of 2nd point
+{
+	float ip = 0.0f;
+	int base = 0;
+	for (int t = 1; t < NORM_K; ++t) {
+		int end = base + 8;
+		for (int i = base; i < end; ++i) {
+			ip += p1[i] * p2[i];
+		}
+		if (ip + norm1[t]*norm2[t] <= threshold) return ip; 
+		base += 8;
+	}
+	for (int i = base; i < dim; ++i) {
+		ip += p1[i] * p2[i];
+	}
+	return ip;
+
+	// unsigned d = dim & ~unsigned(7);
+	// const float *aa = p1, *end_a = aa + d;
+	// const float *bb = p2, *end_b = bb + d;
+
+	// float r = 0.0f;
+	// float r0, r1, r2, r3, r4, r5, r6, r7;
+
+	// const float *a = aa, *b = bb;
+	// int t = 1;
+	// for (; a < end_a; a += 8, b += 8) {
+	// 	__builtin_prefetch(a+32, 0, 3);
+	// 	__builtin_prefetch(b+32, 0, 0);
+
+	// 	r0 = a[0] * b[0];
+	// 	r1 = a[1] * b[1];
+	// 	r2 = a[2] * b[2];
+	// 	r3 = a[3] * b[3];
+	// 	r4 = a[4] * b[4];
+	// 	r5 = a[5] * b[5];
+	// 	r6 = a[6] * b[6];
+	// 	r7 = a[7] * b[7];
+
+	// 	r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+
+	// 	if (t < NORM_K && r+norm1[t]*norm2[t] <= threshold) return r;
+	// 	++t;
+	// }
+	// __builtin_prefetch(a, 0, 3);
+	// __builtin_prefetch(b, 0, 0);
+
+	// r0 = r1 = r2 = r3 = r4 = r5 = r6 = r7 = 0.0f;
+	// switch (dim & 7) {
+	// 	case 7: r6 = a[6] * b[6];
+	// 	case 6: r5 = a[5] * b[5];
+	// 	case 5: r4 = a[4] * b[4];
+	// 	case 4: r3 = a[3] * b[3];
+	// 	case 3: r2 = a[2] * b[2];
+	// 	case 2: r1 = a[1] * b[1];
+	// 	case 1: r0 = a[0] * b[0];
+	// }
+	// r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+	
+	// return r;
+}
+
+// -----------------------------------------------------------------------------
 float calc_l2_sqr(					// calc L2 square distance
 	int   dim,							// dimension
 	float threshold,					// threshold
@@ -167,6 +249,9 @@ float calc_l2_sqr(					// calc L2 square distance
 	unsigned d = dim & ~unsigned(7);
 	const float *aa = p1, *end_a = aa + d;
 	const float *bb = p2, *end_b = bb + d;
+
+	__builtin_prefetch(aa, 0, 3);
+	__builtin_prefetch(bb, 0, 0);
 
 	float r = 0.0f;
 	float r0, r1, r2, r3, r4, r5, r6, r7;
@@ -186,6 +271,9 @@ float calc_l2_sqr(					// calc L2 square distance
 
 	a = aa; b = bb;
 	for (; a < end_a; a += 8, b += 8) {
+		__builtin_prefetch(a+32, 0, 3);
+		__builtin_prefetch(b+32, 0, 0);
+
 		r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
 		if (r > threshold) return r;
 
@@ -201,16 +289,10 @@ float calc_l2_sqr(					// calc L2 square distance
 	r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
 	
 	return r;
-
-	// float ret  = 0.0f;
-	// for (int i = 0; i < dim; ++i) {
-	// 	ret += SQR(p1[i] - p2[i]);
-	// }
-	// return ret;
 }
 
 // -----------------------------------------------------------------------------
-float calc_recall(					// calc recall (percentage)
+float calc_recall(					// calc recall of mip results
 	int   k,							// top-k value
 	const Result *R,					// ground truth results 
 	MaxK_List *list)					// results returned by algorithms
@@ -218,7 +300,21 @@ float calc_recall(					// calc recall (percentage)
 	int i = k - 1;
 	int last = k - 1;
 	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) {
-		i--;
+		--i;
+	}
+	return (i + 1) * 100.0f / k;
+}
+
+// -----------------------------------------------------------------------------
+float calc_recall(					// calc recall of mip results
+	int   k,							// top-k value
+	const Result *R,					// ground truth results 
+	const Result *result)				// MIP results
+{
+	int i = k - 1;
+	int last = k - 1;
+	while (i >= 0 && R[last].key_ - result[i].key_ > FLOATZERO) {
+		--i;
 	}
 	return (i + 1) * 100.0f / k;
 }
@@ -233,76 +329,26 @@ int get_hits(						// get the number of hits between two ID list
 	int i = k - 1;
 	int last = t - 1;
 	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) {
-		i--;
+		--i;
 	}
 	return min(t, i + 1);
 }
 
 // -----------------------------------------------------------------------------
-int ground_truth(					// find the ground truth MIP results
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	const float **data,					// data set
-	const float **query,				// query set
-	const char  *truth_set)				// address of truth set
-{
-	// -------------------------------------------------------------------------
-	//  find ground truth results (using linear scan method)
-	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
-	FILE *fp = fopen(truth_set, "w");
-	if (!fp) {
-		printf("Could not create %s.\n", truth_set);
-		return 1;
-	}
-
-	MaxK_List *list = new MaxK_List(MAXK);
-	fprintf(fp, "%d %d\n", qn, MAXK);
-	for (int i = 0; i < qn; ++i) {
-		list->reset();
-		for (int j = 0; j < n; ++j) {	
-			float ip = calc_inner_product(d, data[j], query[i]);
-			list->insert(ip, j + 1);
-		}
-
-		for (int j = 0; j < MAXK; ++j) {
-			fprintf(fp, "%d %f ", list->ith_id(j), list->ith_key(j));
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	gettimeofday(&g_end_time, NULL);
-	float truth_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-	printf("Ground Truth: %f Seconds\n\n", truth_time);
-
-	// -------------------------------------------------------------------------
-	//  release space
-	// -------------------------------------------------------------------------
-	delete list; list = NULL;
-	
-	return 0;
-}
-
-// -----------------------------------------------------------------------------
 int norm_distribution(				// analyse norm distribution of data
-	int   n,							// number of data points
-	int   d,							// dimension of space
-	const float **data,					// data set
-	const char  *out_path) 				// output path
+	int   n,							// number of data objects
+	int   d,							// dimensionality
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const char  *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
-	//  calc norm for all data objects
+	//  find max l2-norm of all data objects
 	// -------------------------------------------------------------------------
 	gettimeofday(&g_start_time, NULL);
-	vector<float> norm(n, 0.0f);
 	float max_norm = MINREAL;
-
 	for (int i = 0; i < n; ++i) {
-		norm[i] = sqrt(calc_inner_product(d, data[i], data[i]));
-		if (norm[i] > max_norm) max_norm = norm[i];
+		if (norm_d[i][0] > max_norm) max_norm = norm_d[i][0];
 	}
 
 	// -------------------------------------------------------------------------
@@ -314,8 +360,8 @@ int norm_distribution(				// analyse norm distribution of data
 
 	vector<int> freq(m, 0);
 	for (int i = 0; i < n; ++i) {
-		int id = (int) ceil(norm[i] / interval) - 1;
-		if (id < 0) id = 0;
+		int id = (int) ceil(norm_d[i][0] / interval) - 1;
+		if (id < 0)  id = 0;
 		if (id >= m) id = m - 1;
 		freq[id]++;
 	}
@@ -332,18 +378,119 @@ int norm_distribution(				// analyse norm distribution of data
 		return 1;
 	}
 
-	float num = 0.5f / m; 
+	float num  = 0.5f / m;
 	float step = 1.0f / m;
 	for (int i = 0; i < m; ++i) {
-		fprintf(fp, "%.1f\t%f\n", (num + step * i) * 100.0, freq[i] * 100.0 / n);
+		fprintf(fp, "%.1f\t%f\n", (num+step*i)*100.0f, freq[i]*100.0f/n);
 	}
 	fprintf(fp, "\n");
 	fclose(fp);
 
 	gettimeofday(&g_end_time, NULL);
-	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-		g_start_time.tv_usec) / 1000000.0f;
+	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Norm distribution: %.6f Seconds\n\n", runtime);
 
 	return 0;
 }
+
+// -----------------------------------------------------------------------------
+void k_mip_search(					// k-MIP search
+	int   n, 							// number of data objects
+	int   qn,							// number of query objects
+	int   d, 							// dimensionality
+	int   k,							// top-k value
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
+	Result **result)					// k-MIP results (return)
+{
+	// -------------------------------------------------------------------------
+	//  calc the norm of data and query
+	// -------------------------------------------------------------------------
+	Result *order_d = new Result[n];
+	for (int i = 0; i < n; ++i) {
+		order_d[i].id_  = i;
+		order_d[i].key_ = norm_d[i][0];
+	}
+	qsort(order_d, n, sizeof(Result), ResultCompDesc);
+
+	// -------------------------------------------------------------------------
+	//  k-MIP search by linear scan with pruning
+	// -------------------------------------------------------------------------
+	MaxK_List *list = new MaxK_List(k);
+	for (int i = 0; i < qn; ++i) {
+		float kip = MINREAL;
+
+		list->reset();
+		for (int j = 0; j < n; ++j) {
+ 			int id = order_d[j].id_;
+			if (norm_d[id][0] * norm_q[i][0] <= kip) break;
+
+			float ip = calc_inner_product(d, kip, data[id], norm_d[id], 
+				query[i], norm_q[i]);
+			kip = list->insert(ip, id + 1);
+		}
+
+		for (int j = 0; j < k; ++j) {
+			result[i][j].id_  = list->ith_id(j);
+			result[i][j].key_ = list->ith_key(j);
+		}
+	}
+	delete list; list = NULL;
+	delete[] order_d; order_d = NULL;
+}
+
+// -----------------------------------------------------------------------------
+int ground_truth(					// find the ground truth MIP results
+	int   n,							// number of data objects
+	int   qn,							// number of query points
+	int   d,							// dimensionality
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
+	const char  *truth_set) 			// address of truth set
+{
+	gettimeofday(&g_start_time, NULL);
+	FILE *fp = fopen(truth_set, "w");
+	if (!fp) {
+		printf("Could not create %s\n", truth_set);
+		return 1;
+	}
+
+	// -------------------------------------------------------------------------
+	//  find ground truth results (using linear scan method)
+	// -------------------------------------------------------------------------
+	Result **result = new Result*[qn];
+	for (int i = 0; i < qn; ++i) {
+		result[i] = new Result[MAXK];
+	}
+	k_mip_search(n, qn, d, MAXK, data, norm_d, query, norm_q, result);
+
+	fprintf(fp, "%d %d\n", qn, MAXK);
+	for (int i = 0; i < qn; ++i) {
+		for (int j = 0; j < MAXK; ++j) {
+			fprintf(fp, "%d %f ", result[i][j].id_, result[i][j].key_);
+		}
+		fprintf(fp, "\n");
+	}
+	fclose(fp);
+
+	// -------------------------------------------------------------------------
+	//  release space
+	// -------------------------------------------------------------------------
+	for (int i = 0; i < qn; ++i) {
+		delete[] result[i]; result[i] = NULL;
+	}
+	delete[] result; result = NULL;
+
+	gettimeofday(&g_end_time, NULL);
+	float truth_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Ground Truth: %f Seconds\n\n", truth_time);
+	
+	return 0;
+}
+

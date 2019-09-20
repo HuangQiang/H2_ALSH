@@ -15,10 +15,9 @@ class SRP_LSH;
 class Simple_LSH {
 public:
 	Simple_LSH(						// constructor
-		int   n,						// number of data
-		int   d,						// dimension of data
+		int   n,						// number of data objects
+		int   d,						// dimensionality
 		int   K,						// number of hash tables
-		float ratio,					// approximation ratio
 		FILE  *fp,						// output file pointer
 		const float** data);			// data objects
 
@@ -31,14 +30,12 @@ public:
 		MaxK_List* list);				// top-k mip results
 
 protected:
-	int   n_pts_;					// number of data points
-	int   dim_;						// dimension of data
+	int   n_pts_;					// number of data objects
+	int   dim_;						// dimensionality
 	int   K_;						// number of hash tables
-	float appr_ratio_;				// approximation ratio for AMC search
 	const float **data_;			// data objects
 	
-	float M_;						// max norm of data objects
-	int   simple_lsh_dim_;			// dimension of simple_lsh data
+	float M_;						// max l2-norm of data objects
 	float **simple_lsh_data_;		// simple_lsh data
 	SRP_LSH *lsh_;					// SRP_LSH
 

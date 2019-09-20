@@ -28,14 +28,14 @@ class L2_ALSH2 {
 public:
 	L2_ALSH2(						// constructor
 		int   n,						// number of data objects
-		int   qn,						// number of queries
+		int   qn,						// number of query objects
 		int   d,						// dimension of data objects
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
 		float ratio,					// approximation ratio
 		FILE  *fp,						// output file pointer
 		const float **data,				// data objects
-		const float **query);			// queries
+		const float **query);			// query objects
 
 	// -------------------------------------------------------------------------
 	~L2_ALSH2();					// destructor
@@ -48,10 +48,10 @@ public:
 
 protected:
 	int   n_pts_;					// number of data objects
-	int   dim_;						// dimension of data objects
+	int   dim_;						// dimensionality
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	float appr_ratio_;				// approximation ratio for ANN search
+	float nn_ratio_;				// approximation ratio for ANN search
 	const float **data_;			// data objects
 
 	float M_;						// max norm of data and query

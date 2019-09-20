@@ -33,7 +33,7 @@ public:
 	int size() { return num_; }
 
 	// -------------------------------------------------------------------------
-	bool isFull();					// is full?
+	bool isFull() { if (num_ >= k_) return true; else return false; }
 
 	// -------------------------------------------------------------------------
 	float insert(					// insert item
@@ -76,7 +76,7 @@ public:
 	int size() { return num_; }
 
 	// -------------------------------------------------------------------------
-	bool isFull();					// is full?
+	bool isFull() { if (num_ >= k_) return true; else return false; }
 
 	// -------------------------------------------------------------------------
 	float insert(					// insert item

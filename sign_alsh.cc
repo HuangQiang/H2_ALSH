@@ -7,7 +7,6 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	int   K,							// number of hash tables
 	int   m,							// additional dimension of data
 	float U,							// scale factor for data
-	float ratio,						// approximation ratio for AMC search
 	FILE  *fp,							// output file pointer
 	const float** data)			 		// data objects
 {
@@ -20,7 +19,6 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	K_             = K;
 	m_             = m;
 	U_             = U;
-	appr_ratio_    = ratio;
 	data_          = data;
 	sign_alsh_dim_ = d + m;
 
@@ -37,22 +35,20 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	//  display parameters
 	// -------------------------------------------------------------------------
 	printf("Parameters of Sign_ALSH:\n");
-	printf("    n = %d\n", n_pts_);
-	printf("    d = %d\n", dim_);
-	printf("    K = %d\n", K_);
-	printf("    m = %d\n", m_);
+	printf("    n = %d\n",   n_pts_);
+	printf("    d = %d\n",   dim_);
+	printf("    K = %d\n",   K_);
+	printf("    m = %d\n",   m_);
 	printf("    U = %.2f\n", U_);
-	printf("    c = %.2f\n", appr_ratio_);
-	printf("    M = %.2f\n\n", M_);
+	printf("    M = %f\n\n", M_);
 	printf("Indexing Time: %f Seconds\n\n", indexing_time);
 
-	fprintf(fp, "n          = %d\n", n_pts_);
-	fprintf(fp, "d          = %d\n", dim_);
-	fprintf(fp, "K          = %d\n", K_);
-	fprintf(fp, "m          = %d\n", m_);
+	fprintf(fp, "n          = %d\n",   n_pts_);
+	fprintf(fp, "d          = %d\n",   dim_);
+	fprintf(fp, "K          = %d\n",   K_);
+	fprintf(fp, "m          = %d\n",   m_);
 	fprintf(fp, "U          = %.2f\n", U_);
-	fprintf(fp, "c          = %.2f\n", appr_ratio_);
-	fprintf(fp, "M          = %.2f\n", M_);
+	fprintf(fp, "M          = %f\n",   M_);
 	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
 }
 
@@ -62,9 +58,8 @@ void Sign_ALSH::bulkload()			// bulkloading
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	M_ = MINREAL;
 	vector<float> norm(n_pts_, 0.0f);
-
+	M_ = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
 		norm[i] = sqrt(calc_inner_product(dim_, data_[i], data_[i]));
 		if (norm[i] > M_) M_ = norm[i];
@@ -80,7 +75,7 @@ void Sign_ALSH::bulkload()			// bulkloading
 	for (int i = 0; i < n_pts_; ++i) {
 		sign_alsh_data_[i] = new float[sign_alsh_dim_];
 
-		norm[i] = norm[i] * scale;
+		norm[i] *= scale;
 		for (int j = 0; j < sign_alsh_dim_; ++j) {
 			if (j < dim_) {
 				sign_alsh_data_[i][j] = data_[i][j] * scale;
@@ -101,16 +96,11 @@ void Sign_ALSH::bulkload()			// bulkloading
 // -----------------------------------------------------------------------------
 Sign_ALSH::~Sign_ALSH()				// destructor
 {
-	if (sign_alsh_data_ != NULL) {
-		for (int i = 0; i < n_pts_; ++i) {
-			delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
-		}
-		delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
+	delete lsh_; lsh_ = NULL;
+	for (int i = 0; i < n_pts_; ++i) {
+		delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
 	}
-
-	if (lsh_ != NULL) {
-		delete lsh_; lsh_ = NULL;
-	}
+	delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -140,15 +130,11 @@ int Sign_ALSH::kmip(				// c-k-AMIP search
 	//  calc inner product for candidates returned by SRP-LSH
 	// -------------------------------------------------------------------------
 	for (int i = 0; i < top_k; ++i) {
-		int id = mcs_list->ith_id(i);
+		int   id = mcs_list->ith_id(i);
 		float ip = calc_inner_product(dim_, data_[id], query);
 
 		list->insert(ip, id + 1);
 	}
-
-	// -------------------------------------------------------------------------
-	//  release space
-	// -------------------------------------------------------------------------
 	delete[] sign_alsh_query; sign_alsh_query = NULL;
 	delete mcs_list; mcs_list = NULL;
 

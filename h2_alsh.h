@@ -36,15 +36,17 @@ public:
 		float nn_ratio,					// approximation ratio for NN
 		float mip_ratio,				// approximation ratio for MIP
 		FILE  *fp,						// output file pointer
-		const float **data); 			// input data
+		const float **data, 			// input data
+		const float **norm_d);			// l2-norm of data objects
 
 	// -------------------------------------------------------------------------
 	~H2_ALSH();						// destructor		
 
 	// -------------------------------------------------------------------------
-	int kmip(						// c-k-AMIP search
+	int kmip(						// k-MIP search
 		int   top_k,					// top-k value
 		const float *query,				// input query
+		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results (return) 
 
 protected:
@@ -53,7 +55,8 @@ protected:
 	float nn_ratio_;				// approximation ratio for NN
 	float mip_ratio_;				// approximation ratio for MIP
 	const float **data_;			// original data objects
-
+	const float **norm_d_;			// l2-norm of data objects
+	
 	float b_;						// compression ratio
 	float M_;						// max norm of the data objects
 	float **h2_alsh_data_;			// h2_alsh data

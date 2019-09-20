@@ -16,11 +16,10 @@ class Sign_ALSH {
 public:
 	Sign_ALSH(						// constructor
 		int   n,						// number of data objects
-		int   d,						// dimension of data objects
+		int   d,						// dimensionality
 		int   K,						// number of hash tables
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
-		float ratio,					// approximation ratio for AMC search
 		FILE  *fp,						// output file pointer
 		const float** data);	 		// data objects
 
@@ -35,11 +34,10 @@ public:
 
 protected:
 	int   n_pts_;					// number of data points
-	int   dim_;						// dimension of data
+	int   dim_;						// dimensionality
 	int   K_;						// number of hash tables
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	float appr_ratio_;				// approximation ratio
 	const float **data_;			// data objects
 
 	float M_;						// max norm of data objects

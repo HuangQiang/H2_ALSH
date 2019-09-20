@@ -21,7 +21,7 @@ class L2_ALSH {
 public:
 	L2_ALSH(						// constructor
 		int   n,						// number of data objects
-		int   d,						// dimension of data objects
+		int   d,						// dimensionality
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
 		float ratio,					// approximation ratio
@@ -38,11 +38,11 @@ public:
 		MaxK_List *list);				// top-k MIP results (return) 
 
 protected:
-	int   n_pts_;					// number of data points
-	int   dim_;						// dimension of data
+	int   n_pts_;					// number of data objects
+	int   dim_;						// dimensionality
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	float appr_ratio_;				// approximation ratio for ANN search
+	float nn_ratio_;				// approximation ratio for ANN search
 	const float **data_;			// data objects 
 
 	float M_;						// max norm of data

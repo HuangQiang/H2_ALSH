@@ -1,18 +1,6 @@
 #include "headers.h"
 
 // -----------------------------------------------------------------------------
-float uniform(						// r.v. from Uniform(min, max)
-	float min,							// min value
-	float max)							// max value
-{
-	int   num  = rand();
-	float base = (float) RAND_MAX - 1.0F;
-	float frac = ((float) num) / base;
-
-	return (max - min) * frac + min;
-}
-
-// -----------------------------------------------------------------------------
 //	Given a mean and a standard deviation, gaussian generates a normally 
 //		distributed random number.
 //
@@ -36,17 +24,6 @@ float gaussian(						// r.v. from Gaussian(mean, sigma)
 
 	x = x * sigma + mean; 			// x is distributed from N(0, 1)
 	return x;
-}
-
-// -----------------------------------------------------------------------------
-float normal_pdf(					// pdf of Guassian(mean, std)
-	float x,							// variable
-	float u,							// mean
-	float sigma)						// standard error
-{
-	float ret = exp(-(x - u) * (x - u) / (2.0f * sigma * sigma));
-	ret /= sigma * sqrt(2.0f * PI);
-	return ret;
 }
 
 // -----------------------------------------------------------------------------

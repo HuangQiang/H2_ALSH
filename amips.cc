@@ -1,57 +1,60 @@
 #include "headers.h"
 
 // -----------------------------------------------------------------------------
-int h2_alsh(						// mip search via h2_alsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	float nn_ratio,						// approximation ratio for nn search
-	float mip_ratio,					// approximation ratio for mip search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+int linear_scan(					// k-MIP search by linear scan
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sh2_alsh.out", out_path);
+	sprintf(output_set, "%slinear.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, fp, data);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via H2_ALSH
-	// -------------------------------------------------------------------------	
-	printf("Top-k c-AMIP of H2_ALSH: \n");
+	//  k-MIP search by linear scan
+	// -------------------------------------------------------------------------
+	printf("Top-k MIP of Linear Scan:\n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
-		MaxK_List* list = new MaxK_List(top_k);
+		
+		int top_k = TOPK[num];
+		Result **result = new Result*[qn];
+		for (int i = 0; i < qn; ++i) {
+			result[i] = new Result[top_k];
+		}
+		k_mip_search(n, qn, d, top_k, data, norm_d, query, norm_q, result);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
-			list->reset();
-			lsh->kmip(top_k, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
-			
+			g_recall += calc_recall(top_k, R[i], (const Result *) result[i]);
+
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				ratio += R[i][j].key_ / result[i][j].key_;
 			}
 			g_ratio += ratio / top_k;
 		}
-		delete list; list = NULL;
+		for (int i = 0; i < qn; ++i) {
+			delete[] result[i]; result[i] = NULL;
+		}
+		delete[] result; result = NULL;
+
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -65,32 +68,27 @@ int h2_alsh(						// mip search via h2_alsh
 	fprintf(fp, "\n");
 	fclose(fp);
 
-	// -------------------------------------------------------------------------
-	//  release space
-	// -------------------------------------------------------------------------
-	delete lsh; lsh = NULL;
-
 	return 0;
 }
 
 // -----------------------------------------------------------------------------
-int l2_alsh(						// mip search via l2_alsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
+int l2_alsh(						// k-MIP search by l2_alsh
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
 	int   m,							// param of l2_alsh
 	float U,							// param of l2_alsh
-	float nn_ratio,						// approximation ratio for nn search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+	float nn_ratio,						// approximation ratio for ANN search
+	const float **data,					// data objects
+	const float **query,				// query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sl2_alsh.out", out_path);
+	sprintf(output_set, "%sl2_alsh.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -100,21 +98,21 @@ int l2_alsh(						// mip search via l2_alsh
 	L2_ALSH *lsh = new L2_ALSH(n, d, m, U, nn_ratio, fp, data);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via L2_ALSH
+	//  k-MIP search by L2_ALSH
 	// -------------------------------------------------------------------------	
 	printf("Top-k c-AMIP of L2_ALSH: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -124,8 +122,8 @@ int l2_alsh(						// mip search via l2_alsh
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -148,23 +146,23 @@ int l2_alsh(						// mip search via l2_alsh
 }
 
 // -----------------------------------------------------------------------------
-int l2_alsh2(						// mip search via l2_alsh2
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
+int l2_alsh2(						// k-MIP search by l2_alsh2
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
 	int   m,							// param of l2_alsh2
 	float U,							// param of l2_alsh2
-	float nn_ratio,						// approximation ratio for nn search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+	float nn_ratio,						// approximation ratio for ANN search
+	const float **data,					// data objects
+	const float **query,				// query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sl2_alsh2.out", out_path);
+	sprintf(output_set, "%sl2_alsh2.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -174,21 +172,21 @@ int l2_alsh2(						// mip search via l2_alsh2
 	L2_ALSH2 *lsh = new L2_ALSH2(n, qn, d, m, U, nn_ratio, fp, data, query);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via L2_ALSH2
+	//  k-MIP search by L2_ALSH2
 	// -------------------------------------------------------------------------	
 	printf("Top-k c-AMIP of L2_ALSH2: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -198,8 +196,8 @@ int l2_alsh2(						// mip search via l2_alsh2
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -222,21 +220,21 @@ int l2_alsh2(						// mip search via l2_alsh2
 }
 
 // -----------------------------------------------------------------------------
-int xbox(							// mip search via xbox
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	float nn_ratio,						// approximation ratio for nn search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+int xbox(							// k-MIP search by xbox
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
+	float nn_ratio,						// approximation ratio for ANN search
+	const float **data,					// data objects
+	const float **query,				// query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%sxbox.out", out_path);
+	sprintf(output_set, "%sxbox.mip", out_path);
 	
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
@@ -246,21 +244,21 @@ int xbox(							// mip search via xbox
 	XBox *lsh = new XBox(n, d, nn_ratio, fp, data);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via XBox
+	//  k-MIP search by XBox
 	// -------------------------------------------------------------------------
 	printf("Top-k c-AMIP of XBox: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, false, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -270,8 +268,8 @@ int xbox(							// mip search via xbox
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -286,9 +284,9 @@ int xbox(							// mip search via xbox
 	fclose(fp);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via H2-ALSH-
+	//  k-MIP search by H2-ALSH-
 	// -------------------------------------------------------------------------	
-	sprintf(output_set, "%sh2_alsh_minus.out", out_path);
+	sprintf(output_set, "%sh2_alsh_minus.mip", out_path);
 	fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
@@ -299,15 +297,15 @@ int xbox(							// mip search via xbox
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, true, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -317,8 +315,8 @@ int xbox(							// mip search via xbox
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -341,48 +339,47 @@ int xbox(							// mip search via xbox
 }
 
 // -----------------------------------------------------------------------------
-int sign_alsh(						// mip search via sign_alsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
+int sign_alsh(						// k-MIP search by sign_alsh
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
 	int   K,							// number of hash tables
 	int   m,							// param of sign_alsh
 	float U,							// param of sign_alsh
-	float nn_ratio,						// approximation ratio for nn search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+	const float **data,					// data objects
+	const float **query,				// query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%ssign_alsh.out", out_path);
+	sprintf(output_set, "%ssign_alsh.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, nn_ratio, fp, data);
+	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, fp, data);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via Sign_ALSH
+	//  k-MIP search by Sign_ALSH
 	// -------------------------------------------------------------------------
 	printf("Top-k c-AMIP of Sign_ALSH: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -392,8 +389,8 @@ int sign_alsh(						// mip search via sign_alsh
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -416,46 +413,45 @@ int sign_alsh(						// mip search via sign_alsh
 }
 
 // -----------------------------------------------------------------------------
-int simple_lsh(						// mip search via simple_lsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
+int simple_lsh(						// k-MIP search by simple_lsh
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
 	int   K,							// number of hash tables
-	float nn_ratio,						// approximation ratio for nn search
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+	const float **data,					// data objects
+	const float **query,				// query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%ssimple_lsh.out", out_path);
+	sprintf(output_set, "%ssimple_lsh.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Simple_LSH *lsh = new Simple_LSH(n, d, K, nn_ratio, fp, data);
+	Simple_LSH *lsh = new Simple_LSH(n, d, K, fp, data);
 
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via Simple_LSH
+	//  k-MIP search by Simple_LSH
 	// -------------------------------------------------------------------------	
 	printf("Top-k c-AMIP of Simple_LSH: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
-		MaxK_List* list = new MaxK_List(top_k);
+		int top_k = TOPK[num];
+		MaxK_List *list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
 			lsh->kmip(top_k, query[i], list);
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
@@ -465,8 +461,8 @@ int simple_lsh(						// mip search via simple_lsh
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -489,54 +485,59 @@ int simple_lsh(						// mip search via simple_lsh
 }
 
 // -----------------------------------------------------------------------------
-int linear_scan(					// find top-k mip using linear_scan
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
+int h2_alsh(						// k-MIP search by h2_alsh
+	int   n,							// number of data objects
+	int   qn,							// number of query objects
+	int   d,							// dimensionality
+	float nn_ratio,						// approximation ratio for ANN search
+	float mip_ratio,					// approximation ratio for AMIP search
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
+	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
 	// -------------------------------------------------------------------------
-	//  c-AMIP search via linear scan
+	//  indexing
 	// -------------------------------------------------------------------------
 	char output_set[200];
-	sprintf(output_set, "%slinear.out", out_path);
+	sprintf(output_set, "%sh2_alsh.mip", out_path);
 
 	FILE *fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
+	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, fp, data, norm_d);
 
-	printf("Top-k MIP of Linear Scan:\n");
+	// -------------------------------------------------------------------------
+	//  k-MIP search by H2_ALSH
+	// -------------------------------------------------------------------------	
+	printf("Top-k c-AMIP of H2_ALSH: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
 		gettimeofday(&g_start_time, NULL);
-		int top_k = kMIPs[num];
+		int top_k = TOPK[num];
 		MaxK_List* list = new MaxK_List(top_k);
 
-		g_ratio = 0.0f;
+		g_ratio  = 0.0f;
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			for (int j = 0; j < n; ++j) {
-				float ip = calc_inner_product(d, data[j], query[i]);
-				list->insert(ip, j + 1);
-			}
-			g_recall += calc_recall(top_k, (const Result *) R[i], list);
-
+			lsh->kmip(top_k, query[i], norm_q[i], list);
+			g_recall += calc_recall(top_k, R[i], list);
+			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += R[i][j].key_ / list->ith_key(j);
+				ratio += list->ith_key(j) / R[i][j].key_;
 			}
 			g_ratio += ratio / top_k;
 		}
 		delete list; list = NULL;
 		gettimeofday(&g_end_time, NULL);
-		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-			g_start_time.tv_usec) / 1000000.0f;
+		g_runtime = g_end_time.tv_sec - g_start_time.tv_sec + 
+			(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 
 		g_ratio   = g_ratio / qn;
 		g_recall  = g_recall / qn;
@@ -550,242 +551,10 @@ int linear_scan(					// find top-k mip using linear_scan
 	fprintf(fp, "\n");
 	fclose(fp);
 
-	return 0;
-}
-
-// -----------------------------------------------------------------------------
-int h2_alsh_precision_recall(		// precision recall curve of h2_alsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	float nn_ratio,						// approximation ratio for nn search
-	float mip_ratio,					// approximation ratio for mip search
-	float **pre,						// precision 
-	float **recall,						// recall
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
-	const char *out_path)				// output path
-{
 	// -------------------------------------------------------------------------
-	//  indexing
+	//  release space
 	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
-	char output_set[200];
-	sprintf(output_set, "%sh2_alsh_precision_recall.out", out_path);
-
-	FILE *fp = fopen(output_set, "a+");
-	if (!fp) {
-		printf("Could not create %s\n", output_set);
-		return 1;
-	}
-	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, fp, data);
-
-	// -------------------------------------------------------------------------
-	//  Precision Recall Curve of H2_ALSH
-	// -------------------------------------------------------------------------
-	for (int t = 0; t < MAX_T; ++t) {
-		int top_t = tMIPs[t];
-		MaxK_List* list = new MaxK_List(top_t);
-
-		for (int i = 0; i < qn; ++i) {
-			list->reset();
-			lsh->kmip(top_t, query[i], list);
-
-			for (int round = 0; round < MAX_ROUND; ++round) {
-				int top_k = kMIPs[round];
-				int hits = get_hits(top_t, top_k, R[i], list);
-
-				pre[round][t]    += hits / (float) top_t;
-				recall[round][t] += hits / (float) top_k;
-			}
-		}
-		delete list; list = NULL;
-	}
 	delete lsh; lsh = NULL;
 
-	for (int round = 0; round < MAX_ROUND; ++round) {
-		int top_k = kMIPs[round];
-		printf("Top-%d\t\tRecall\t\tPrecision\n", top_k);
-		fprintf(fp, "Top-%d\tRecall\t\tPrecision\n", top_k);
-		
-		for (int t = 0; t < MAX_T; ++t) {
-			int top_t = tMIPs[t];
-			pre[round][t]    = pre[round][t]    * 100.0f / qn;
-			recall[round][t] = recall[round][t] * 100.0f / qn;
-
-			printf("%4d\t\t%.2f\t\t%.2f\n", top_t, recall[round][t], pre[round][t]);
-			fprintf(fp, "%d\t%f\t%f\n", top_t, recall[round][t], pre[round][t]);
-		}
-		printf("\n");
-		fprintf(fp, "\n");
-	}
-	fprintf(fp, "\n");
-	fclose(fp);
-
-	gettimeofday(&g_end_time, NULL);
-	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-		g_start_time.tv_usec) / 1000000.0f;
-	printf("Precision-Recall Curve: %.6f Seconds\n\n", runtime);
-
 	return 0;
 }
-
-// -----------------------------------------------------------------------------
-int sign_alsh_precision_recall(		// precision recall curve of sign_alsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	int   K,							// number of hash tables
-	int   m,							// param of sign_alsh
-	float U,							// param of sign_alsh
-	float nn_ratio,						// approximation ratio for nn search
-	float **pre,						// precision 
-	float **recall,						// recall
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
-	const char *out_path)				// output path
-{
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
-	char output_set[200];
-	sprintf(output_set, "%ssign_alsh_precision_recall.out", out_path);
-
-	FILE *fp = fopen(output_set, "a+");
-	if (!fp) {
-		printf("Could not create %s\n", output_set);
-		return 1;
-	}
-	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, nn_ratio, fp, data);
-
-	// -------------------------------------------------------------------------
-	//  Precision Recall Curve of Sign-ALSH
-	// -------------------------------------------------------------------------	
-	for (int t = 0; t < MAX_T; ++t) {
-		int top_t = tMIPs[t];
-		MaxK_List* list = new MaxK_List(top_t);
-
-		for (int i = 0; i < qn; ++i) {
-			list->reset();
-			lsh->kmip(top_t, query[i], list);
-
-			for (int round = 0; round < MAX_ROUND; ++round) {
-				int top_k = kMIPs[round];
-				int hits = get_hits(top_t, top_k, R[i], list);
-
-				pre[round][t]    += hits / (float) top_t;
-				recall[round][t] += hits / (float) top_k;
-			}
-		}
-		delete list; list = NULL;
-	}
-	delete lsh; lsh = NULL;
-
-	for (int round = 0; round < MAX_ROUND; ++round) {
-		int top_k = kMIPs[round];
-		printf("Top-%d\t\tRecall\t\tPrecision\n", top_k);
-		fprintf(fp, "Top-%d\tRecall\t\tPrecision\n", top_k);
-		
-		for (int t = 0; t < MAX_T; ++t) {
-			int top_t = tMIPs[t];
-			pre[round][t]    = pre[round][t]    * 100.0f / qn;
-			recall[round][t] = recall[round][t] * 100.0f / qn;
-
-			printf("%4d\t\t%.2f\t\t%.2f\n", top_t, recall[round][t], pre[round][t]);
-			fprintf(fp, "%d\t%f\t%f\n", top_t, recall[round][t], pre[round][t]);
-		}
-		printf("\n");
-		fprintf(fp, "\n");
-	}
-	fprintf(fp, "\n");
-	fclose(fp);
-
-	gettimeofday(&g_end_time, NULL);
-	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-		g_start_time.tv_usec) / 1000000.0f;
-	printf("Precision-Recall Curve: %.6f Seconds\n\n", runtime);
-
-	return 0;
-}
-
-// -----------------------------------------------------------------------------
-int simple_lsh_precision_recall(	// precision recall curve of simple_lsh
-	int   n,							// number of data points
-	int   qn,							// number of query points
-	int   d,							// dimension of space
-	int   K,							// number of hash tables
-	float nn_ratio,						// approximation ratio for nn search
-	float **pre,						// precision 
-	float **recall,						// recall
-	const float **data,					// data set
-	const float **query,				// query set
-	const Result **R,					// truth set
-	const char *out_path)				// output path
-{
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
-	char output_set[200];
-	sprintf(output_set, "%ssimple_lsh_precision_recall.out", out_path);
-
-	FILE *fp = fopen(output_set, "a+");
-	if (!fp) {
-		printf("Could not create %s\n", output_set);
-		return 1;
-	}
-	Simple_LSH *lsh = new Simple_LSH(n, d, K, nn_ratio, fp, data);
-
-	// -------------------------------------------------------------------------
-	//  Precision Recall Curve of Simple_LSH
-	// -------------------------------------------------------------------------
-	for (int t = 0; t < MAX_T; ++t) {
-		int top_t = tMIPs[t];
-		MaxK_List* list = new MaxK_List(top_t);
-
-		for (int i = 0; i < qn; ++i) {
-			list->reset();
-			lsh->kmip(top_t, query[i], list);
-
-			for (int round = 0; round < MAX_ROUND; ++round) {
-				int top_k = kMIPs[round];
-				int hits = get_hits(top_t, top_k, R[i], list);
-
-				pre[round][t]    += hits / (float) top_t;
-				recall[round][t] += hits / (float) top_k;
-			}
-		}
-		delete list; list = NULL;
-	}
-	delete lsh; lsh = NULL;
-
-	for (int round = 0; round < MAX_ROUND; ++round) {
-		int top_k = kMIPs[round];
-		printf("Top-%d\t\tRecall\t\tPrecision\n", top_k);
-		fprintf(fp, "Top-%d\tRecall\t\tPrecision\n", top_k);
-		
-		for (int t = 0; t < MAX_T; ++t) {
-			int top_t = tMIPs[t];
-			pre[round][t]    = pre[round][t]    * 100.0f / qn;
-			recall[round][t] = recall[round][t] * 100.0f / qn;
-
-			printf("%4d\t\t%.2f\t\t%.2f\n", top_t, recall[round][t], pre[round][t]);
-			fprintf(fp, "%d\t%f\t%f\n", top_t, recall[round][t], pre[round][t]);
-		}
-		printf("\n");
-		fprintf(fp, "\n");
-	}
-	fprintf(fp, "\n");
-	fclose(fp);
-
-	gettimeofday(&g_end_time, NULL);
-	float runtime = g_end_time.tv_sec - g_start_time.tv_sec + (g_end_time.tv_usec - 
-		g_start_time.tv_usec) / 1000000.0f;
-	printf("Precision-Recall Curve: %.6f Seconds\n\n", runtime);
-
-	return 0;
-}
-
