@@ -4,9 +4,9 @@
 
 This package provides several LSH-base schemes for ```k-Maximum Inner Product Search (k-MIPS)```. It is also an implementation of ```H2_ALSH``` from the paper as follows:
 ```
-Qiang Huang, Guihong Ma, Jianlin Feng, Qiong Fang, and Anthony K. H. Tung. Accurate 
-and Fast Asymmetric Locality-Sensitive Hashing Scheme for Maximum Inner Product 
-Search. SIGKDD, pages 1561-1570, 2018.
+Qiang Huang, Guihong Ma, Jianlin Feng, Qiong Fang, and Anthony K. H. Tung. Accurate and Fast 
+Locality-Sensitive Hashing Scheme for Maximum Inner Product Search. In Proceedings of the 24th 
+ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining, pages 1561-1570, 2018.
 ```
 
 ## Compilation
