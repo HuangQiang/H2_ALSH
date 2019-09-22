@@ -2,11 +2,9 @@
 
 ## Introduction
 
-This package provides several internal asymmetric LSH schemes for ```k-Maximum Inner Product Search (k-MIPS)```. It is also an implementation of ```H2_ALSH``` from the paper as follows:
+This package provides several LSH-base schemes for ```k-Maximum Inner Product Search (k-MIPS)```. It is also an implementation of ```H2_ALSH``` from the paper as follows:
 ```
-Qiang Huang, Guihong Ma, Jianlin Feng, Qiong Fang, and Anthony K. H. Tung. 
-Accurate and Fast Asymmetric Locality-Sensitive Hashing Scheme for Maximum 
-Inner Product Search. SIGKDD, pages 1561-1570, 2018.
+Qiang Huang, Guihong Ma, Jianlin Feng, Qiong Fang, and Anthony K. H. Tung. Accurate and Fast Asymmetric Locality-Sensitive Hashing Scheme for Maximum Inner Product Search. SIGKDD, pages 1561-1570, 2018.
 ```
 
 ## Compilation
@@ -20,21 +18,23 @@ $ make
 
 ## Datasets
 
-We four real-life datasets [```Sift```](https://drive.google.com/open?id=1dAFbjQWoBIAW30lGzTXaf_w7DxBSUzoN), [```Gist```](https://drive.google.com/open?id=1r1rsSm6-IdWX2-8eFJkChFfP0Ej7TYM4), [```Netflix```](https://drive.google.com/open?id=1bJQftqxlC8u4ijDf5gpEnw1tJE2nLfoG), and [```Yahoo```](https://drive.google.com/open?id=18k0ISgjtQhHHqoGi8A96Fm-Q2gX_jxgw) for comparison. The statistics of the datasets are summarized in the following table:
+We four real-life datasets [Sift](https://drive.google.com/open?id=1dAFbjQWoBIAW30lGzTXaf_w7DxBSUzoN), [Gist](https://drive.google.com/open?id=1r1rsSm6-IdWX2-8eFJkChFfP0Ej7TYM4), [Netflix](https://drive.google.com/open?id=1bJQftqxlC8u4ijDf5gpEnw1tJE2nLfoG), and [Yahoo](https://drive.google.com/open?id=18k0ISgjtQhHHqoGi8A96Fm-Q2gX_jxgw) for comparison. The statistics of the datasets are summarized in the following table:
 
 | Datasets | #Objects | #Queries | Dimensionality | Data Size |
 | -------- | -------- | -------- | --------       | --------  |
-| Sift     | ```1,000,000``` | ```1,000```  | 128 | 337.8 MB  |
-| Netflix  | ```17,770```    | ```1,000```  | 300 | 50.8 MB   |
-| Yahoo    | ```624,961```   | ```1,000```  | 300 | 2.3 GB    |
-| Gist     | ```1,000,000``` | ```1,000```  | 960 | 4.0 GB    |
+| Sift     | 1,000,000 | 1,000  | 128 | 337.8 MB  |
+| Netflix  | 17,770    | 1,000  | 300 | 50.8 MB   |
+| Yahoo    | 624,961   | 1,000  | 300 | 2.3 GB    |
+| Gist     | 1,000,000 | 1,000  | 960 | 4.0 GB    |
 
 ## Run Experiments
 
 ```
 Usage: alsh [OPTIONS]
 
-This package supports 12 options to evaluate the performance of H2_ALSH, L2_ALSH, L2_ALSH2, XBOX, Sign_ALSH, Simple_LSH and Linear_Scan for k-MIPS. The parameters are introduced as follows.
+This package supports 12 options to evaluate the performance of H2_ALSH, L2_ALSH, 
+L2_ALSH2, XBOX, Sign_ALSH, Simple_LSH and Linear_Scan for k-MIPS. The parameters 
+are introduced as follows.
 
   -alg    integer    options of algorithms (0 - 11)
   -n      integer    cardinality of dataset
