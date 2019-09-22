@@ -20,14 +20,14 @@ $ make
 
 ## Datasets
 
-We four real-life datasets [Sift](https://drive.google.com/open?id=1dAFbjQWoBIAW30lGzTXaf_w7DxBSUzoN), [Gist](https://drive.google.com/open?id=1r1rsSm6-IdWX2-8eFJkChFfP0Ej7TYM4), [Netflix](https://drive.google.com/open?id=1bJQftqxlC8u4ijDf5gpEnw1tJE2nLfoG), and [Yahoo](https://drive.google.com/open?id=18k0ISgjtQhHHqoGi8A96Fm-Q2gX_jxgw) for comparison. The statistics of the datasets are summarized in the following table:
+We use four real-life datasets [Sift](https://drive.google.com/open?id=1dAFbjQWoBIAW30lGzTXaf_w7DxBSUzoN), [Gist](https://drive.google.com/open?id=1r1rsSm6-IdWX2-8eFJkChFfP0Ej7TYM4), [Netflix](https://drive.google.com/open?id=1bJQftqxlC8u4ijDf5gpEnw1tJE2nLfoG), and [Yahoo](https://drive.google.com/open?id=18k0ISgjtQhHHqoGi8A96Fm-Q2gX_jxgw) for comparison. The statistics of the datasets are summarized in the following table:
 
-| Datasets | #Objects | #Queries | Dimensionality | Data Size |
-| -------- | -------- | -------- | --------       | --------  |
-| Sift     | 1,000,000 | 1,000  | 128 | 337.8 MB  |
-| Netflix  | 17,770    | 1,000  | 300 | 50.8 MB   |
-| Yahoo    | 624,961   | 1,000  | 300 | 2.3 GB    |
-| Gist     | 1,000,000 | 1,000  | 960 | 4.0 GB    |
+| Datasets | #Objects  | #Queries | Dimensionality | Data Size |
+| -------- | --------- | -------- | -------------- | --------- |
+| Sift     | 1,000,000 | 1,000    | 128            | 337.8 MB  |
+| Netflix  | 17,770    | 1,000    | 300            | 50.8 MB   |
+| Yahoo    | 624,961   | 1,000    | 300            | 2.3 GB    |
+| Gist     | 1,000,000 | 1,000    | 960            | 4.0 GB    |
 
 ## Run Experiments
 
@@ -53,7 +53,7 @@ are introduced as follows.
   -op     string     output path
 ```
 
-We provide all scripts to repeat all experiments. A quick example is shown as follows (run ```H2_ALSH``` on ```Mnist```):
+We provide all scripts to repeat all experiments reported in SIGKDD 2018. A quick example is shown as follows (run ```H2_ALSH``` on ```Mnist```):
 ```
 ./alsh -alg 1 -n 60000 -qn 1000 -d 50 -c0 2.0 -c 0.5 -ds data/Mnist/Mnist.ds -qs data/Mnist/Mnist.q -ts data/Mnist/Mnist.mip -op results/Mnist/
 ```
