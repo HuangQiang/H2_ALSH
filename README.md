@@ -1,4 +1,4 @@
-# H2_ALSH: Homocentric Hypersphere partition Asymmetric LSH
+# H2_ALSH
 
 ## Introduction
 
