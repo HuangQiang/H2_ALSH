@@ -63,7 +63,7 @@ We provide all scripts to repeat all experiments reported in SIGKDD 2018. A quic
 
 If you would like to get more information to run other algorithms, please check the scripts in the package. When you run the package, please ensure that the path for the dataset, query set, and truth set is correct. Since the package will automatically create folder for the output path, please keep the path as short as possible.
 
-## Related publication
+## Related Publication
 
 If you use this package for publications, please cite the paper as follows.
 
