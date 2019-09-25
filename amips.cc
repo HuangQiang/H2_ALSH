@@ -43,7 +43,11 @@ int linear_scan(					// k-MIP search by linear scan
 
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += R[i][j].key_ / result[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) {
+					ratio += result[i][j].key_ / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -116,7 +120,11 @@ int l2_alsh(						// k-MIP search by l2_alsh
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -190,7 +198,11 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -262,7 +274,11 @@ int xbox(							// k-MIP search by xbox
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -309,7 +325,11 @@ int xbox(							// k-MIP search by xbox
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -383,7 +403,11 @@ int sign_alsh(						// k-MIP search by sign_alsh
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -455,7 +479,11 @@ int simple_lsh(						// k-MIP search by simple_lsh
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
@@ -530,7 +558,11 @@ int h2_alsh(						// k-MIP search by h2_alsh
 			
 			float ratio = 0.0f;
 			for (int j = 0; j < top_k; ++j) {
-				ratio += list->ith_key(j) / R[i][j].key_;
+				if (R[i][j].key_ > FLOATZERO) { 
+					ratio += list->ith_key(j) / R[i][j].key_;
+				} else {
+					ratio += 1.0f;
+				}
 			}
 			g_ratio += ratio / top_k;
 		}
