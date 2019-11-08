@@ -1,4 +1,11 @@
-#include "headers.h"
+#include <algorithm>
+#include <cstring>
+
+#include "def.h"
+#include "util.h"
+#include "amips.h"
+#include "pre_recall.h"
+
 
 // -----------------------------------------------------------------------------
 void usage() 						// display the usage of this package
@@ -262,23 +269,28 @@ int main(int nargs, char **args)
 		break;
 	case 2:
 		l2_alsh(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, out_path);
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R, out_path);
 		break;
 	case 3:
 		l2_alsh2(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) query, (const Result **) R, out_path);
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R, out_path);
 		break;
 	case 4:
-		xbox(n, qn, d, nn_ratio, (const float **) data, (const float **) query, 
-			(const Result **) R, out_path);
+		xbox(n, qn, d, nn_ratio, (const float **) data, 
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R, out_path);
 		break;
 	case 5:
 		sign_alsh(n, qn, d, K, m, U, (const float **) data, 
-			(const float **) query, (const Result **) R, out_path);
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R, out_path);
 		break;
 	case 6:
 		simple_lsh(n, qn, d, K, (const float **) data, 
-			(const float **) query, (const Result **) R, out_path);
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R, out_path);
 		break;
 	case 7:
 		linear_scan(n, qn, d, (const float **) data, (const float **) norm_d,
@@ -293,12 +305,14 @@ int main(int nargs, char **args)
 		break;
 	case 9:
 		sign_alsh_precision_recall(n, qn, d, K, m, U, pre, recall, 
-			(const float **) data, (const float **) query, 
+			(const float **) data,  (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q,
 			(const Result **) R, out_path);
 		break;
 	case 10:
 		simple_lsh_precision_recall(n, qn, d, K, pre, recall, 
-			(const float **) data, (const float **) query, 
+			(const float **) data,  (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q,
 			(const Result **) R, out_path);
 		break;
 	case 11:

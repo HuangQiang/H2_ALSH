@@ -23,12 +23,15 @@ public:
 	XBox(							// default constructor
 		int   n,						// number of data objects
 		int   d,						// dimensionality
-		float ratio,					// approximation ratio
-		FILE  *fp,						// output file pointer
-		const float** data);			// original data objects
+		float nn_ratio,					// approximation ratio for ANN search
+		const float **data, 			// input data
+		const float **norm_d);			// l2-norm of data objects
 
 	// -------------------------------------------------------------------------
 	~XBox();						// destructor
+
+	// -------------------------------------------------------------------------
+	void display();					// display parameters
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -41,7 +44,8 @@ protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimensionality
 	float nn_ratio_;				// approximation ratio for ANN search
-	const float **data_;			// data objects
+	const float **data_;			// original data objects
+	const float **norm_d_;			// l2-norm of data objects
 
 	float M_;						// max norm of data objects
 	float **xbox_data_;				// xbox data

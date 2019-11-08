@@ -1,4 +1,17 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "l2_alsh.h"
+#include "l2_alsh2.h"
+#include "xbox.h"
+#include "sign_alsh.h"
+#include "simple_lsh.h"
+#include "h2_alsh.h"
+#include "amips.h"
+
 
 // -----------------------------------------------------------------------------
 int linear_scan(					// k-MIP search by linear scan
@@ -84,13 +97,12 @@ int l2_alsh(						// k-MIP search by l2_alsh
 	float U,							// param of l2_alsh
 	float nn_ratio,						// approximation ratio for ANN search
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
 	sprintf(output_set, "%sl2_alsh.mip", out_path);
 
@@ -99,7 +111,19 @@ int l2_alsh(						// k-MIP search by l2_alsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	L2_ALSH *lsh = new L2_ALSH(n, d, m, U, nn_ratio, fp, data);
+
+	// -------------------------------------------------------------------------
+	//  indexing
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	L2_ALSH *lsh = new L2_ALSH(n, d, m, U, nn_ratio, data, norm_d);
+	lsh->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by L2_ALSH
@@ -162,13 +186,12 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 	float U,							// param of l2_alsh2
 	float nn_ratio,						// approximation ratio for ANN search
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
 	sprintf(output_set, "%sl2_alsh2.mip", out_path);
 
@@ -177,7 +200,19 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	L2_ALSH2 *lsh = new L2_ALSH2(n, qn, d, m, U, nn_ratio, fp, data, query);
+
+	// -------------------------------------------------------------------------
+	//  indexing
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	L2_ALSH2 *lsh = new L2_ALSH2(n, qn, d, m, U, nn_ratio, data, norm_d, norm_q);
+	lsh->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by L2_ALSH2
@@ -238,26 +273,38 @@ int xbox(							// k-MIP search by xbox
 	int   d,							// dimensionality
 	float nn_ratio,						// approximation ratio for ANN search
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
+	char output_set[200];
+	FILE *fp = NULL;
+
 	// -------------------------------------------------------------------------
 	//  indexing
 	// -------------------------------------------------------------------------
-	char output_set[200];
-	sprintf(output_set, "%sxbox.mip", out_path);
-	
-	FILE *fp = fopen(output_set, "a+");
-	if (!fp) {
-		printf("Could not create %s\n", output_set);
-		return 1;
-	}
-	XBox *lsh = new XBox(n, d, nn_ratio, fp, data);
+	gettimeofday(&g_start_time, NULL);
+	XBox *xbox = new XBox(n, d, nn_ratio, data, norm_d);
+	xbox->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by XBox
 	// -------------------------------------------------------------------------
+	sprintf(output_set, "%sxbox.mip", out_path);
+	fp = fopen(output_set, "a+");
+	if (!fp) {
+		printf("Could not create %s\n", output_set);
+		return 1;
+	}
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+
 	printf("Top-k c-AMIP of XBox: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
 	for (int num = 0; num < MAX_ROUND; ++num) {
@@ -269,7 +316,7 @@ int xbox(							// k-MIP search by xbox
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, false, query[i], list);
+			xbox->kmip(top_k, false, query[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -308,6 +355,7 @@ int xbox(							// k-MIP search by xbox
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	printf("Top-k c-AMIP of H2-ALSH-: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
@@ -320,7 +368,7 @@ int xbox(							// k-MIP search by xbox
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, true, query[i], list);
+			xbox->kmip(top_k, true, query[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -353,7 +401,7 @@ int xbox(							// k-MIP search by xbox
 	// -------------------------------------------------------------------------
 	//  release space
 	// -------------------------------------------------------------------------
-	delete lsh; lsh = NULL;
+	delete xbox; xbox = NULL;
 
 	return 0;
 }
@@ -367,13 +415,12 @@ int sign_alsh(						// k-MIP search by sign_alsh
 	int   m,							// param of sign_alsh
 	float U,							// param of sign_alsh
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
 	sprintf(output_set, "%ssign_alsh.mip", out_path);
 
@@ -382,7 +429,19 @@ int sign_alsh(						// k-MIP search by sign_alsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, fp, data);
+
+	// -------------------------------------------------------------------------
+	//  indexing
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, data, norm_d);
+	lsh->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by Sign_ALSH
@@ -443,13 +502,12 @@ int simple_lsh(						// k-MIP search by simple_lsh
 	int   d,							// dimensionality
 	int   K,							// number of hash tables
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
 	sprintf(output_set, "%ssimple_lsh.mip", out_path);
 
@@ -458,7 +516,19 @@ int simple_lsh(						// k-MIP search by simple_lsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Simple_LSH *lsh = new Simple_LSH(n, d, K, fp, data);
+
+	// -------------------------------------------------------------------------
+	//  indexing
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	Simple_LSH *lsh = new Simple_LSH(n, d, K, data, norm_d);
+	lsh->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by Simple_LSH
@@ -526,9 +596,6 @@ int h2_alsh(						// k-MIP search by h2_alsh
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
-	// -------------------------------------------------------------------------
-	//  indexing
-	// -------------------------------------------------------------------------
 	char output_set[200];
 	sprintf(output_set, "%sh2_alsh.mip", out_path);
 
@@ -537,7 +604,19 @@ int h2_alsh(						// k-MIP search by h2_alsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, fp, data, norm_d);
+
+	// -------------------------------------------------------------------------
+	//  indexing
+	// -------------------------------------------------------------------------
+	gettimeofday(&g_start_time, NULL);
+	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, data, norm_d);
+	lsh->display();
+
+	gettimeofday(&g_end_time, NULL);
+	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by H2_ALSH

@@ -1,9 +1,6 @@
 #ifndef __H2_ALSH_H
 #define __H2_ALSH_H
 
-#include <vector>
-using namespace std;
-
 class QALSH;
 class MaxK_List;
 
@@ -35,12 +32,14 @@ public:
 		int   d,						// dimension of data objects
 		float nn_ratio,					// approximation ratio for NN
 		float mip_ratio,				// approximation ratio for MIP
-		FILE  *fp,						// output file pointer
 		const float **data, 			// input data
 		const float **norm_d);			// l2-norm of data objects
 
 	// -------------------------------------------------------------------------
-	~H2_ALSH();						// destructor		
+	~H2_ALSH();						// destructor
+
+	// -------------------------------------------------------------------------
+	void display();					// display parameters
 
 	// -------------------------------------------------------------------------
 	int kmip(						// k-MIP search
@@ -61,7 +60,7 @@ protected:
 	float M_;						// max norm of the data objects
 	float **h2_alsh_data_;			// h2_alsh data
 	int   num_blocks_;				// number of blocks
-	vector<Block*> blocks_;			// blocks
+	std::vector<Block*> blocks_;	// blocks
 	
 	// -------------------------------------------------------------------------
 	void bulkload();				// bulkloading

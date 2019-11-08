@@ -24,12 +24,15 @@ public:
 		int   d,						// dimensionality
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
-		float ratio,					// approximation ratio
-		FILE  *fp,						// output file pointer
-		const float** data);			// data objects
+		float nn_ratio,					// approximation ratio for ANN search
+		const float **data, 			// input data
+		const float **norm_d);			// l2-norm of data objects
 
 	// -------------------------------------------------------------------------
 	~L2_ALSH();						// destructor
+
+	// -------------------------------------------------------------------------
+	void display();					// display parameters
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -43,7 +46,8 @@ protected:
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
 	float nn_ratio_;				// approximation ratio for ANN search
-	const float **data_;			// data objects 
+	const float **data_;			// original data objects
+	const float **norm_d_;			// l2-norm of data objects
 
 	float M_;						// max norm of data
 	int   l2_alsh_dim_;				// dimension of l2_alsh data (dim_ + m_)

@@ -1,4 +1,11 @@
-#include "headers.h"
+#include <algorithm>
+#include <cstring>
+
+#include "def.h"
+#include "random.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
 
 // -----------------------------------------------------------------------------
 QALSH::QALSH(						// constructor
@@ -145,7 +152,7 @@ int QALSH::knn(						// c-k-ANN search
 		q_val_[i] = tmp.key_;
 
 		table = tables_[i];
-		int pos = lower_bound(table, table+n_pts_, tmp, cmp) - table;
+		int pos = std::lower_bound(table, table+n_pts_, tmp, cmp) - table;
 		if (pos <= 0) {
 			lpos_[i] = -1; rpos_[i] = pos;
 		}

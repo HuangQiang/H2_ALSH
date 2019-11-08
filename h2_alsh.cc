@@ -1,4 +1,11 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+#include "h2_alsh.h"
 
 // -----------------------------------------------------------------------------
 H2_ALSH::H2_ALSH(					// constructor
@@ -6,14 +13,12 @@ H2_ALSH::H2_ALSH(					// constructor
 	int   d,							// dimension of data objects
 	float nn_ratio,						// approximation ratio for ANN search
 	float mip_ratio,					// approximation ratio for AMIP search
-	FILE  *fp,							// output file pointer
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
 	n_pts_     = n;	
 	dim_       = d;
 	nn_ratio_  = nn_ratio;
@@ -25,30 +30,20 @@ H2_ALSH::H2_ALSH(					// constructor
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
+}
 
-	gettimeofday(&g_end_time, NULL);
-	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+// -----------------------------------------------------------------------------
+H2_ALSH::~H2_ALSH()					// destructor
+{
+	for (int i = 0; i < n_pts_; ++i) {
+		delete[] h2_alsh_data_[i]; h2_alsh_data_[i] = NULL;
+	}
+	delete[] h2_alsh_data_; h2_alsh_data_ = NULL;
 
-	// -------------------------------------------------------------------------
-	//  display parameters
-	// -------------------------------------------------------------------------
-	printf("Parameters of H2_ALSH:\n");
-	printf("    n          = %d\n",   n_pts_);
-	printf("    d          = %d\n",   dim_);
-	printf("    c0         = %.1f\n", nn_ratio_);
-	printf("    c          = %.1f\n", mip_ratio_);
-	printf("    M          = %f\n",   M_);
-	printf("    num_blocks = %d\n\n", num_blocks_);
-	printf("Indexing Time: %f Seconds\n\n", indexing_time);
-
-	fprintf(fp, "n          = %d\n",   n_pts_);
-	fprintf(fp, "d          = %d\n",   dim_);
-	fprintf(fp, "c0         = %.1f\n", nn_ratio_);
-	fprintf(fp, "c          = %.1f\n", mip_ratio_);
-	fprintf(fp, "M          = %f\n",   M_);
-	fprintf(fp, "num_blocks = %d\n",   num_blocks_);
-	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
+	for (int i = 0; i < num_blocks_; ++i) {
+		delete blocks_[i]; blocks_[i] = NULL;
+	}
+	blocks_.clear(); blocks_.shrink_to_fit();
 }
 
 // -----------------------------------------------------------------------------
@@ -118,18 +113,16 @@ void H2_ALSH::bulkload()			// bulkloading
 	delete[] order; order = NULL;
 }
 
-// -----------------------------------------------------------------------------
-H2_ALSH::~H2_ALSH()					// destructor
+// -------------------------------------------------------------------------
+void H2_ALSH::display()				// display parameters
 {
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] h2_alsh_data_[i]; h2_alsh_data_[i] = NULL;
-	}
-	delete[] h2_alsh_data_; h2_alsh_data_ = NULL;
-
-	for (int i = 0; i < num_blocks_; ++i) {
-		delete blocks_[i]; blocks_[i] = NULL;
-	}
-	blocks_.clear(); blocks_.shrink_to_fit();
+	printf("Parameters of H2_ALSH:\n");
+	printf("    n          = %d\n",   n_pts_);
+	printf("    d          = %d\n",   dim_);
+	printf("    c0         = %.1f\n", nn_ratio_);
+	printf("    c          = %.1f\n", mip_ratio_);
+	printf("    M          = %f\n",   M_);
+	printf("    num_blocks = %d\n\n", num_blocks_);
 }
 
 // -----------------------------------------------------------------------------

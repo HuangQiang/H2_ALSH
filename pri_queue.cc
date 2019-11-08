@@ -1,4 +1,9 @@
-#include "headers.h"
+#include <cstring>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
 
 // -----------------------------------------------------------------------------
 MinK_List::MinK_List(				// constructor (given max size)

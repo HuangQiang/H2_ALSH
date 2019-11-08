@@ -1,4 +1,18 @@
-#include "headers.h"
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <vector>
+
+#include <sys/time.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
 
 timeval g_start_time;
 timeval g_end_time;
@@ -274,7 +288,7 @@ float calc_l2_sqr(					// calc L2 square distance
 		__builtin_prefetch(a+32, 0, 3);
 		__builtin_prefetch(b+32, 0, 0);
 
-		r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+		r += (r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7);
 		if (r > threshold) return r;
 
 		r0 = SQR(a[0] - b[0]);
@@ -286,7 +300,7 @@ float calc_l2_sqr(					// calc L2 square distance
 		r6 = SQR(a[6] - b[6]);
 		r7 = SQR(a[7] - b[7]);
 	}
-	r += r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+	r += (r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7);
 	
 	return r;
 }
@@ -331,7 +345,7 @@ int get_hits(						// get the number of hits between two ID list
 	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) {
 		--i;
 	}
-	return min(t, i + 1);
+	return MIN(t, i + 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -358,7 +372,7 @@ int norm_distribution(				// analyse norm distribution of data
 	float interval = max_norm / m;
 	printf("m = %d, max_norm = %f, interval = %f\n", m, max_norm, interval);
 
-	vector<int> freq(m, 0);
+	std::vector<int> freq(m, 0);
 	for (int i = 0; i < n; ++i) {
 		int id = (int) ceil(norm_d[i][0] / interval) - 1;
 		if (id < 0)  id = 0;

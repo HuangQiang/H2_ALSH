@@ -1,8 +1,7 @@
 #ifndef __PRE_RECALL_H
 #define __PRE_RECALL_H
 
-// -----------------------------------------------------------------------------
-//  interface of this package
+
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
 	int   n,							// number of data objects
@@ -30,7 +29,9 @@ int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
 	float **pre,						// precision 
 	float **recall,						// recall
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path);				// output path
 
@@ -43,7 +44,9 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 	float **pre,						// precision 
 	float **recall,						// recall
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path);				// output path
 

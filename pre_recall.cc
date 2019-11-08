@@ -1,4 +1,13 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "sign_alsh.h"
+#include "simple_lsh.h"
+#include "h2_alsh.h"
+#include "pre_recall.h"
 
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
@@ -28,7 +37,7 @@ int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, fp, data, norm_d);
+	H2_ALSH *lsh = new H2_ALSH(n, d, nn_ratio, mip_ratio, data, norm_d);
 
 	// -------------------------------------------------------------------------
 	//  Precision Recall Curve of H2_ALSH
@@ -91,7 +100,9 @@ int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
 	float **pre,						// precision 
 	float **recall,						// recall
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
@@ -107,7 +118,7 @@ int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, fp, data);
+	Sign_ALSH *lsh = new Sign_ALSH(n, d, K, m, U, data, norm_d);
 
 	// -------------------------------------------------------------------------
 	//  Precision Recall Curve of Sign-ALSH
@@ -168,7 +179,9 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 	float **pre,						// precision 
 	float **recall,						// recall
 	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
 	const Result **R,					// MIP ground truth results
 	const char *out_path)				// output path
 {
@@ -184,7 +197,7 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	Simple_LSH *lsh = new Simple_LSH(n, d, K, fp, data);
+	Simple_LSH *lsh = new Simple_LSH(n, d, K, data, norm_d);
 
 	// -------------------------------------------------------------------------
 	//  Precision Recall Curve of Simple_LSH

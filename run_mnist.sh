@@ -19,11 +19,11 @@ c=0.5
 dPath=./data/${dname}/${dname}
 oPath=./results/${dname}/
 
-# ------------------------------------------------------------------------------
-#  Ground-Truth
-# ------------------------------------------------------------------------------
-./alsh -alg 0 -n ${n} -qn ${qn} -d ${d} -ds ${dPath}.ds -qs ${dPath}.q \
-    -ts ${dPath}.mip
+# # ------------------------------------------------------------------------------
+# #  Ground-Truth
+# # ------------------------------------------------------------------------------
+# ./alsh -alg 0 -n ${n} -qn ${qn} -d ${d} -ds ${dPath}.ds -qs ${dPath}.q \
+#     -ts ${dPath}.mip
 
 # ------------------------------------------------------------------------------
 #  Algorithms for c-k-AMIP search
@@ -49,19 +49,19 @@ oPath=./results/${dname}/
 ./alsh -alg 7 -n ${n} -qn ${qn} -d ${d} -ds ${dPath}.ds -qs ${dPath}.q \
     -ts ${dPath}.mip -op ${oPath}
 
-# ------------------------------------------------------------------------------
-#  Precision-Recall Curves of Algorithms for c-k-AMIP search
-# ------------------------------------------------------------------------------
-./alsh -alg 8 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
-    -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
+# # ------------------------------------------------------------------------------
+# #  Precision-Recall Curves of Algorithms for c-k-AMIP search
+# # ------------------------------------------------------------------------------
+# ./alsh -alg 8 -n ${n} -qn ${qn} -d ${d} -c0 ${c0} -c ${c} -ds ${dPath}.ds \
+#     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 9 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} \
-    -ds ${dPath}.ds -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
+# ./alsh -alg 9 -n ${n} -qn ${qn} -d ${d} -K ${K} -m ${m} -U ${U2} \
+#     -ds ${dPath}.ds -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-./alsh -alg 10 -n ${n} -qn ${qn} -d ${d} -K ${K} -ds ${dPath}.ds \
-    -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
+# ./alsh -alg 10 -n ${n} -qn ${qn} -d ${d} -K ${K} -ds ${dPath}.ds \
+#     -qs ${dPath}.q -ts ${dPath}.mip -op ${oPath}
 
-# ------------------------------------------------------------------------------
-#  Norm Distribution
-# ------------------------------------------------------------------------------
-./alsh -alg 11 -n ${n} -d ${d} -ds ${dPath}.ds -op ${oPath}
+# # ------------------------------------------------------------------------------
+# #  Norm Distribution
+# # ------------------------------------------------------------------------------
+# ./alsh -alg 11 -n ${n} -d ${d} -ds ${dPath}.ds -op ${oPath}

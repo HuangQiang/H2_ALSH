@@ -1,4 +1,10 @@
-#include "headers.h"
+#include <algorithm>
+
+#include "def.h"
+#include "util.h"
+#include "random.h"
+#include "pri_queue.h"
+#include "srp_lsh.h"
 
 // -----------------------------------------------------------------------------
 SRP_LSH::SRP_LSH(					// constructor

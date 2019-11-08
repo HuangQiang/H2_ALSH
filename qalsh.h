@@ -1,7 +1,8 @@
 #ifndef __QALSH_H
 #define __QALSH_H
 
-class MinK_List;
+struct Result;
+class  MinK_List;
 
 // -----------------------------------------------------------------------------
 //  Query-Aware Locality-Sensitive Hashing (QALSH) is used to solve the problem 

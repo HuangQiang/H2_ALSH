@@ -1,46 +1,45 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "srp_lsh.h"
+#include "simple_lsh.h"
+
 
 // -----------------------------------------------------------------------------
 Simple_LSH::Simple_LSH(				// constructor
 	int   n,							// number of data
 	int   d,							// dimension of data
 	int   K,							// number of hash tables
-	FILE  *fp,							// output file pointer
-	const float** data)					// data objects
+	const float **data, 				// input data
+	const float **norm_d)				// l2-norm of data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
 	gettimeofday(&g_start_time, NULL);
-	n_pts_ = n;
-	dim_   = d;
-	K_     = K;
-	data_  = data;
+	n_pts_  = n;
+	dim_    = d;
+	K_      = K;
+	data_   = data;
+	norm_d_ = norm_d;
 
 	// -------------------------------------------------------------------------
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
+}
 
-	gettimeofday(&g_end_time, NULL);
-	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
-
-	// -------------------------------------------------------------------------
-	//  display parameters
-	// -------------------------------------------------------------------------
-	printf("Parameters of Simple_LSH:\n");
-	printf("    n = %d\n",   n_pts_);
-	printf("    d = %d\n",   dim_);
-	printf("    K = %d\n",   K_);
-	printf("    M = %f\n\n", M_);
-	printf("Indexing Time: %f Seconds\n\n", indexing_time);
-
-	fprintf(fp, "n          = %d\n", n_pts_);
-	fprintf(fp, "d          = %d\n", dim_);
-	fprintf(fp, "K          = %d\n", K_);
-	fprintf(fp, "M          = %f\n", M_);
-	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
+// -----------------------------------------------------------------------------
+Simple_LSH::~Simple_LSH()			// destructor
+{
+	delete lsh_; lsh_ = NULL;
+	for (int i = 0; i < n_pts_; ++i) {
+		delete[] simple_lsh_data_[i]; simple_lsh_data_[i] = NULL;
+	}
+	delete[] simple_lsh_data_; simple_lsh_data_ = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,7 +48,7 @@ void Simple_LSH::bulkload()			// bulkloading
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	vector<float> norm_sqr(n_pts_, 0.0f);
+	std::vector<float> norm_sqr(n_pts_, 0.0f);
 	float max_norm_sqr = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
 		norm_sqr[i] = calc_inner_product(dim_, data_[i], data_[i]);
@@ -76,13 +75,13 @@ void Simple_LSH::bulkload()			// bulkloading
 }
 
 // -----------------------------------------------------------------------------
-Simple_LSH::~Simple_LSH()			// destructor
+void Simple_LSH::display() 			// display parameters
 {
-	delete lsh_; lsh_ = NULL;
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] simple_lsh_data_[i]; simple_lsh_data_[i] = NULL;
-	}
-	delete[] simple_lsh_data_; simple_lsh_data_ = NULL;
+	printf("Parameters of Simple_LSH:\n");
+	printf("    n = %d\n",   n_pts_);
+	printf("    d = %d\n",   dim_);
+	printf("    K = %d\n",   K_);
+	printf("    M = %f\n\n", M_);
 }
 
 // -----------------------------------------------------------------------------

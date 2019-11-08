@@ -1,12 +1,19 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+#include "xbox.h"
 
 // -----------------------------------------------------------------------------
 XBox::XBox(							// constructor
 	int   n,							// number of data objects
 	int   d,							// dimension of data objects
-	float ratio,						// approximation ratio
-	FILE  *fp,							// output file pointer
-	const float** data) 				// original data objects
+	float nn_ratio,						// approximation ratio for ANN search
+	const float **data, 				// input data
+	const float **norm_d)				// l2-norm of data objects
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
@@ -14,33 +21,24 @@ XBox::XBox(							// constructor
 	gettimeofday(&g_start_time, NULL);
 	n_pts_      = n;
 	dim_        = d;
-	nn_ratio_   = ratio;
+	nn_ratio_   = nn_ratio;
 	data_       = data;
+	norm_d_     = norm_d;
 
 	// -------------------------------------------------------------------------
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
+}
 
-	gettimeofday(&g_end_time, NULL);
-	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-
-	// -------------------------------------------------------------------------
-	//  display parameters
-	// -------------------------------------------------------------------------
-	printf("Parameters of XBox:\n");
-	printf("    n  = %d\n",   n_pts_);
-	printf("    d  = %d\n",   dim_);
-	printf("    c0 = %.1f\n", nn_ratio_);
-	printf("    M  = %f\n\n", M_);
-	printf("Indexing Time: %f Seconds\n\n", indexing_time);
-
-	fprintf(fp, "n          = %d\n",   n_pts_);
-	fprintf(fp, "d          = %d\n",   dim_);
-	fprintf(fp, "c0         = %.1f\n", nn_ratio_);
-	fprintf(fp, "M          = %f\n",   M_);
-	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
+// -----------------------------------------------------------------------------
+XBox::~XBox()						// destructor
+{
+	delete lsh_; lsh_ = NULL;
+	for (int i = 0; i < n_pts_; ++i) {
+		delete[] xbox_data_[i]; xbox_data_[i] = NULL;
+	}
+	delete[] xbox_data_; xbox_data_ = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,7 +47,7 @@ void XBox::bulkload()				// bulkloading
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	vector<float> norm_sqr(n_pts_, 0.0f);
+	std::vector<float> norm_sqr(n_pts_, 0.0f);
 	float max_norm_sqr = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
 		norm_sqr[i] = calc_inner_product(dim_, data_[i], data_[i]);
@@ -76,13 +74,13 @@ void XBox::bulkload()				// bulkloading
 }
 
 // -----------------------------------------------------------------------------
-XBox::~XBox()						// destructor
+void XBox::display()				// display parameters
 {
-	delete lsh_; lsh_ = NULL;
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] xbox_data_[i]; xbox_data_[i] = NULL;
-	}
-	delete[] xbox_data_; xbox_data_ = NULL;
+	printf("Parameters of XBox:\n");
+	printf("    n  = %d\n",   n_pts_);
+	printf("    d  = %d\n",   dim_);
+	printf("    c0 = %.1f\n", nn_ratio_);
+	printf("    M  = %f\n\n", M_);
 }
 
 // -----------------------------------------------------------------------------

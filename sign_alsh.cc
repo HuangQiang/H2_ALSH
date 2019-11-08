@@ -1,4 +1,11 @@
-#include "headers.h"
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "srp_lsh.h"
+#include "sign_alsh.h"
 
 // -----------------------------------------------------------------------------
 Sign_ALSH::Sign_ALSH(				// constructor
@@ -7,13 +14,13 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	int   K,							// number of hash tables
 	int   m,							// additional dimension of data
 	float U,							// scale factor for data
-	FILE  *fp,							// output file pointer
-	const float** data)			 		// data objects
+	const float **data, 				// input data
+	const float **norm_d)				// l2-norm of data objects
+
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
 	n_pts_         = n;
 	dim_           = d;
 	K_             = K;
@@ -26,30 +33,16 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	//  build index
 	// -------------------------------------------------------------------------
 	bulkload();
-	
-	gettimeofday(&g_end_time, NULL);
-	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;	
+}
 
-	// -------------------------------------------------------------------------
-	//  display parameters
-	// -------------------------------------------------------------------------
-	printf("Parameters of Sign_ALSH:\n");
-	printf("    n = %d\n",   n_pts_);
-	printf("    d = %d\n",   dim_);
-	printf("    K = %d\n",   K_);
-	printf("    m = %d\n",   m_);
-	printf("    U = %.2f\n", U_);
-	printf("    M = %f\n\n", M_);
-	printf("Indexing Time: %f Seconds\n\n", indexing_time);
-
-	fprintf(fp, "n          = %d\n",   n_pts_);
-	fprintf(fp, "d          = %d\n",   dim_);
-	fprintf(fp, "K          = %d\n",   K_);
-	fprintf(fp, "m          = %d\n",   m_);
-	fprintf(fp, "U          = %.2f\n", U_);
-	fprintf(fp, "M          = %f\n",   M_);
-	fprintf(fp, "index_time = %f Seconds\n\n", indexing_time);
+// -----------------------------------------------------------------------------
+Sign_ALSH::~Sign_ALSH()				// destructor
+{
+	delete lsh_; lsh_ = NULL;
+	for (int i = 0; i < n_pts_; ++i) {
+		delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
+	}
+	delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -58,7 +51,7 @@ void Sign_ALSH::bulkload()			// bulkloading
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	vector<float> norm(n_pts_, 0.0f);
+	std::vector<float> norm(n_pts_, 0.0f);
 	M_ = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
 		norm[i] = sqrt(calc_inner_product(dim_, data_[i], data_[i]));
@@ -94,13 +87,15 @@ void Sign_ALSH::bulkload()			// bulkloading
 }
 
 // -----------------------------------------------------------------------------
-Sign_ALSH::~Sign_ALSH()				// destructor
+void Sign_ALSH::display()			// display parameters
 {
-	delete lsh_; lsh_ = NULL;
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] sign_alsh_data_[i]; sign_alsh_data_[i] = NULL;
-	}
-	delete[] sign_alsh_data_; sign_alsh_data_ = NULL;
+	printf("Parameters of Sign_ALSH:\n");
+	printf("    n = %d\n",   n_pts_);
+	printf("    d = %d\n",   dim_);
+	printf("    K = %d\n",   K_);
+	printf("    m = %d\n",   m_);
+	printf("    U = %.2f\n", U_);
+	printf("    M = %f\n\n", M_);
 }
 
 // -----------------------------------------------------------------------------

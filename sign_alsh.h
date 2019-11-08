@@ -2,6 +2,7 @@
 #define __SIGN_ALSH_H
 
 class SRP_LSH;
+class MaxK_List;
 
 // -----------------------------------------------------------------------------
 //  Sign-LSH is used to solve the problem of c-Approximate Maximum Inner 
@@ -20,11 +21,14 @@ public:
 		int   K,						// number of hash tables
 		int   m,						// additional dimension of data
 		float U,						// scale factor for data
-		FILE  *fp,						// output file pointer
-		const float** data);	 		// data objects
+		const float **data, 			// input data
+		const float **norm_d);			// l2-norm of data objects
 
 	// -------------------------------------------------------------------------	
 	~Sign_ALSH();					// destrcutor
+
+	// -------------------------------------------------------------------------
+	void display();					// display parameters
 
 	// -------------------------------------------------------------------------
 	int kmip(						// c-k-AMIP search
@@ -38,7 +42,8 @@ protected:
 	int   K_;						// number of hash tables
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	const float **data_;			// data objects
+	const float **data_;			// original data objects
+	const float **norm_d_;			// l2-norm of data objects
 
 	float M_;						// max norm of data objects
 	int   sign_alsh_dim_;			// dimension of sign_alsh data

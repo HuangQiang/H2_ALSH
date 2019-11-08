@@ -1,4 +1,8 @@
-#include "headers.h"
+#include <algorithm>
+#include <cmath>
+
+#include "def.h"
+#include "random.h"
 
 // -----------------------------------------------------------------------------
 //	Given a mean and a standard deviation, gaussian generates a normally 
@@ -20,7 +24,7 @@ float gaussian(						// r.v. from Gaussian(mean, sigma)
 		v2 = 2.0F * uniform(0.0F, 1.0F) - 1.0F;
 		s = v1 * v1 + v2 * v2;
 	} while (s >= 1.0F);
-	x = v1 * sqrt (-2.0F * log (s) / s);
+	x = v1 * sqrt(-2.0F * log (s) / s);
 
 	x = x * sigma + mean; 			// x is distributed from N(0, 1)
 	return x;

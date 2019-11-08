@@ -1,6 +1,8 @@
 #ifndef __SRP_LSH_H
 #define __SRP_LSH_H
 
+class MaxK_List;
+
 // -----------------------------------------------------------------------------
 //  Sign-Random Projection LSH (SRP_LSH) is used to solve the problem of 
 //  c-Approximate Maximum Cosine (c-AMC) search
