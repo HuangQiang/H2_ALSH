@@ -38,6 +38,7 @@ public:
 	int kmip(						// c-k-AMIP search
 		int   top_k,					// top-k value
 		const float *query,				// input query
+		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results (return) 
 
 protected:

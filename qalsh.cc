@@ -120,24 +120,11 @@ int QALSH::knn(						// c-k-ANN search
 	int   top_k,						// top-k
 	float R,							// limited search range
 	const float *query,					// input query
-	MinK_List *list)					// top-k NN results (return)
+	std::vector<int> &cand)				// NN candidates (return)
 {
-	int    candidates = CANDIDATES + top_k - 1; // candidate size
-	float  kdist      = MAXREAL;	// k-th ANN distance
-	Result *table     = NULL;
-
-	// -------------------------------------------------------------------------
-	//  linear scan if the number of data is small enough
-	// -------------------------------------------------------------------------
-	if (candidates >= n_pts_) {
-		float dist = -1.0f;
-		for (int i = 0; i < n_pts_; ++i) {
-			dist  = calc_l2_sqr(dim_, kdist, data_[i], query);
-			kdist = list->insert(dist, i);
-		}
-		return n_pts_;
-	}
-
+	int candidates = CANDIDATES + top_k - 1; // candidate size
+	// float kdist = MAXREAL;			// k-th ANN distance
+	
 	// -------------------------------------------------------------------------
 	//  initialize parameters
 	// -------------------------------------------------------------------------
@@ -147,6 +134,7 @@ int QALSH::knn(						// c-k-ANN search
 	memset(range_flag_, true, m_ * SIZEBOOL);
 	
 	Result tmp;
+	Result *table = NULL;
 	for (int i = 0; i < m_; ++i) {
 		tmp.key_= calc_inner_product(dim_, (const float *) a_[i], query);
 		q_val_[i] = tmp.key_;
@@ -210,8 +198,9 @@ int QALSH::knn(						// c-k-ANN search
 					id = table[pos].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
 						checked_[id] = true;
-						dist = calc_l2_sqr(dim_, kdist, data_[id], query);
-						kdist = list->insert(dist, id);
+						cand.push_back(id);
+						// dist = calc_l2_sqr(dim_, kdist, data_[id], query);
+						// kdist = list->insert(dist, id);
 
 						if (++dist_cnt >= candidates) break;
 					}
@@ -235,8 +224,9 @@ int QALSH::knn(						// c-k-ANN search
 					id = table[pos].id_;
 					if (++freq_[id] >= l_ && !checked_[id]) {
 						checked_[id] = true;
-						dist = calc_l2_sqr(dim_, kdist, data_[id], query);
-						kdist = list->insert(dist, id);
+						cand.push_back(id);
+						// dist = calc_l2_sqr(dim_, kdist, data_[id], query);
+						// kdist = list->insert(dist, id);
 
 						if (++dist_cnt >= candidates) break;
 					}
@@ -268,7 +258,7 @@ int QALSH::knn(						// c-k-ANN search
 		// ---------------------------------------------------------------------
 		//  step 3: stop condition T1 and T2
 		// ---------------------------------------------------------------------
-		if (sqrt(kdist) < appr_ratio_ * radius) break;
+		// if (sqrt(kdist) < appr_ratio_ * radius) break;
 		if (num_range >= m_ || dist_cnt >= candidates) break;
 
 		// ---------------------------------------------------------------------

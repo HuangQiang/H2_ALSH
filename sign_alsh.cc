@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/time.h>
 
 #include "def.h"
 #include "util.h"
@@ -16,7 +15,6 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	float U,							// scale factor for data
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
-
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
@@ -27,6 +25,7 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	m_             = m;
 	U_             = U;
 	data_          = data;
+	norm_d_        = norm_d;
 	sign_alsh_dim_ = d + m;
 
 	// -------------------------------------------------------------------------
@@ -54,7 +53,7 @@ void Sign_ALSH::bulkload()			// bulkloading
 	std::vector<float> norm(n_pts_, 0.0f);
 	M_ = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
-		norm[i] = sqrt(calc_inner_product(dim_, data_[i], data_[i]));
+		norm[i] = norm_d_[i][0];
 		if (norm[i] > M_) M_ = norm[i];
 	}
 
@@ -101,37 +100,41 @@ void Sign_ALSH::display()			// display parameters
 // -----------------------------------------------------------------------------
 int Sign_ALSH::kmip(				// c-k-AMIP search
 	int   top_k,						// top-k value
-	const float* query,					// input query
-	MaxK_List* list)					// top-k mip results
+	const float *query,					// input query
+	const float *norm_q,				// l2-norm of query
+	MaxK_List *list)					// top-k mip results
 {
+	float kip   = MINREAL;
+	float normq = norm_q[0];
+
 	// -------------------------------------------------------------------------
 	//  construct Sign_ALSH query
 	// -------------------------------------------------------------------------
-	float norm_q = sqrt(calc_inner_product(dim_, query, query));
 	float *sign_alsh_query = new float[sign_alsh_dim_]; // dim + m
-	
 	for (int i = 0; i < sign_alsh_dim_; ++i) {
-		if (i < dim_) sign_alsh_query[i] = query[i] / norm_q;
+		if (i < dim_) sign_alsh_query[i] = query[i] / normq;
 		else sign_alsh_query[i] = 0.0f;
 	}
 
 	// -------------------------------------------------------------------------
 	//  conduct c-k-AMC search by SRP-LSH
 	// -------------------------------------------------------------------------
-	MaxK_List *mcs_list = new MaxK_List(top_k);
-	lsh_->kmc(top_k, (const float *) sign_alsh_query,  mcs_list);
+	std::vector<int> cand;
+	lsh_->kmc(top_k, (const float *) sign_alsh_query, cand);
 
 	// -------------------------------------------------------------------------
 	//  calc inner product for candidates returned by SRP-LSH
 	// -------------------------------------------------------------------------
-	for (int i = 0; i < top_k; ++i) {
-		int   id = mcs_list->ith_id(i);
-		float ip = calc_inner_product(dim_, data_[id], query);
-
-		list->insert(ip, id + 1);
+	int size = (int) cand.size();
+	for (int i = 0; i < size; ++i) {
+		int id = cand[i];
+		if (norm_d_[id][0] * normq <= kip) break;
+				
+		float ip = calc_inner_product(dim_, kip, data_[id], norm_d_[id], 
+			query, norm_q);
+		kip = list->insert(ip, id + 1);
 	}
 	delete[] sign_alsh_query; sign_alsh_query = NULL;
-	delete mcs_list; mcs_list = NULL;
 
 	return 0;
 }

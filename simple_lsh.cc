@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/time.h>
 
 #include "def.h"
 #include "util.h"
@@ -19,7 +18,6 @@ Simple_LSH::Simple_LSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
 	n_pts_  = n;
 	dim_    = d;
 	K_      = K;
@@ -51,7 +49,7 @@ void Simple_LSH::bulkload()			// bulkloading
 	std::vector<float> norm_sqr(n_pts_, 0.0f);
 	float max_norm_sqr = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
-		norm_sqr[i] = calc_inner_product(dim_, data_[i], data_[i]);
+		norm_sqr[i] = norm_d_[i][0] * norm_d_[i][0];
 		if (norm_sqr[i] > max_norm_sqr) max_norm_sqr = norm_sqr[i];
 	}
 	M_ = sqrt(max_norm_sqr);
@@ -88,36 +86,40 @@ void Simple_LSH::display() 			// display parameters
 int Simple_LSH::kmip(				// c-k-AMIP search
 	int   top_k,						// top-k value
 	const float *query,					// input query
+	const float *norm_q,				// l2-norm of query
 	MaxK_List *list)					// top-k MIP results (return) 
 {
+	float kip   = MINREAL;
+	float normq = norm_q[0];
+
 	// -------------------------------------------------------------------------
 	//  construct Simple_LSH query
 	// -------------------------------------------------------------------------
-	float norm_q = sqrt(calc_inner_product(dim_, query, query));
 	float *simple_lsh_query = new float[dim_ + 1];
-
 	for (int i = 0; i < dim_; ++i) {
-		simple_lsh_query[i] = query[i] / norm_q;
+		simple_lsh_query[i] = query[i] / normq;
 	}
 	simple_lsh_query[dim_] = 0.0f;
 
 	// -------------------------------------------------------------------------
 	//  conduct c-k-AMC search by SRP-LSH
 	// -------------------------------------------------------------------------
-	MaxK_List *mcs_list = new MaxK_List(top_k);
-	lsh_->kmc(top_k, (const float *) simple_lsh_query, mcs_list);
+	std::vector<int> cand;
+	lsh_->kmc(top_k, (const float *) simple_lsh_query, cand);
 
 	// -------------------------------------------------------------------------
 	//  calc inner product for candidates returned by SRP-LSH
 	// -------------------------------------------------------------------------
-	for (int i = 0; i < top_k; ++i) {
-		int   id = mcs_list->ith_id(i);
-		float ip = calc_inner_product(dim_, data_[id], query);
-
-		list->insert(ip, id + 1);
+	int size = (int) cand.size();
+	for (int i = 0; i < size; ++i) {
+		int id = cand[i];
+		if (norm_d_[id][0] * normq <= kip) break;
+				
+		float ip = calc_inner_product(dim_, kip, data_[id], norm_d_[id], 
+			query, norm_q);
+		kip = list->insert(ip, id + 1);
 	}
 	delete[] simple_lsh_query; simple_lsh_query = NULL;
-	delete mcs_list; mcs_list = NULL;
 
 	return 0;
 }

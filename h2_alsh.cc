@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/time.h>
 
 #include "def.h"
 #include "util.h"
@@ -138,7 +137,7 @@ int H2_ALSH::kmip(					// c-k-AMIP search
 	float kip   = MINREAL;
 	float normq = norm_q[0];
 	float *h2_alsh_query = new float[dim_ + 1];
-	MinK_List *nn_list = new MinK_List(top_k);
+	std::vector<int> cand;
 
 	// -------------------------------------------------------------------------
 	//  c-k-AMIP search
@@ -173,16 +172,16 @@ int H2_ALSH::kmip(					// c-k-AMIP search
 				h2_alsh_query[j] = lambda * query[j];
 			}
 			h2_alsh_query[dim_] = 0.0f;
-			nn_list->reset();
-			
-			block->lsh_->knn(top_k, R, (const float *) h2_alsh_query, nn_list);
+
+			cand.clear();
+			block->lsh_->knn(top_k, R, (const float *) h2_alsh_query, cand);
 
 			// -----------------------------------------------------------------
 			//  compute inner product for the candidates returned by qalsh
 			// -----------------------------------------------------------------
-			int size = (int) nn_list->size();
+			int size = (int) cand.size();
 			for (int j = 0; j < size; ++j) {
-				int id = index[nn_list->ith_id(j)];
+				int id = index[cand[j]];
 
 				if (norm_d_[id][0] * normq > kip) {
 					float ip = calc_inner_product(dim_, kip, data_[id], 
@@ -193,7 +192,6 @@ int H2_ALSH::kmip(					// c-k-AMIP search
 		}
 	}
 	delete[] h2_alsh_query; h2_alsh_query = NULL;
-	delete nn_list; nn_list = NULL;
 
 	return 0;
 }

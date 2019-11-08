@@ -129,7 +129,7 @@ int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
 
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_t, query[i], list);
+			lsh->kmip(top_t, query[i], norm_q[i], list);
 
 			for (int r = 0; r < MAX_ROUND; ++r) {
 				int top_k = TOPK[r];
@@ -208,7 +208,7 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_t, query[i], list);
+			lsh->kmip(top_t, query[i], norm_q[i], list);
 
 			for (int r = 0; r < MAX_ROUND; ++r) {
 				int top_k = TOPK[r];

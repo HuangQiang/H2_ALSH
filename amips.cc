@@ -139,7 +139,7 @@ int l2_alsh(						// k-MIP search by l2_alsh
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, query[i], list);
+			lsh->kmip(top_k, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -228,7 +228,7 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, query[i], list);
+			lsh->kmip(top_k, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -316,7 +316,7 @@ int xbox(							// k-MIP search by xbox
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			xbox->kmip(top_k, false, query[i], list);
+			xbox->kmip(top_k, false, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -368,7 +368,7 @@ int xbox(							// k-MIP search by xbox
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			xbox->kmip(top_k, true, query[i], list);
+			xbox->kmip(top_k, true, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -457,7 +457,7 @@ int sign_alsh(						// k-MIP search by sign_alsh
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, query[i], list);
+			lsh->kmip(top_k, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;
@@ -544,7 +544,7 @@ int simple_lsh(						// k-MIP search by simple_lsh
 		g_recall = 0.0f;
 		for (int i = 0; i < qn; ++i) {
 			list->reset();
-			lsh->kmip(top_k, query[i], list);
+			lsh->kmip(top_k, query[i], norm_q[i], list);
 			g_recall += calc_recall(top_k, R[i], list);
 			
 			float ratio = 0.0f;

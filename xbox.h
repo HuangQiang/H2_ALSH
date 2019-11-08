@@ -38,6 +38,7 @@ public:
 		int   top_k,					// top-k value
 		bool  used_new_transform,		// used new transformation
 		const float *query,				// input query
+		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results
 
 protected:

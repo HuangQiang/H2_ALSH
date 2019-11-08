@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/time.h>
 
 #include "def.h"
 #include "util.h"
@@ -18,7 +17,6 @@ XBox::XBox(							// constructor
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	gettimeofday(&g_start_time, NULL);
 	n_pts_      = n;
 	dim_        = d;
 	nn_ratio_   = nn_ratio;
@@ -50,7 +48,7 @@ void XBox::bulkload()				// bulkloading
 	std::vector<float> norm_sqr(n_pts_, 0.0f);
 	float max_norm_sqr = MINREAL;
 	for (int i = 0; i < n_pts_; ++i) {
-		norm_sqr[i] = calc_inner_product(dim_, data_[i], data_[i]);
+		norm_sqr[i] = norm_d_[i][0] * norm_d_[i][0];
 		if (norm_sqr[i] > max_norm_sqr) max_norm_sqr = norm_sqr[i];
 	}
 	M_ = sqrt(max_norm_sqr);
@@ -88,15 +86,18 @@ int XBox::kmip(						// c-k-AMIP search
 	int   top_k,						// top-k value
 	bool  used_new_transform,			// used new transformation
 	const float *query,					// input query
+	const float *norm_q,				// l2-norm of query
 	MaxK_List *list)					// top-k MIP results (return) 
 {
+	float kip   = MINREAL;
+	float normq = norm_q[0];
+
 	// -------------------------------------------------------------------------
 	//  construct XBox query
 	// -------------------------------------------------------------------------
-	float norm_q = sqrt(calc_inner_product(dim_, query, query));
-	float lambda = used_new_transform ? M_ / norm_q : 1.0f;
-	float *xbox_query = new float[dim_ + 1];
+	float lambda = used_new_transform ? M_ / normq : 1.0f;
 
+	float *xbox_query = new float[dim_ + 1];
 	for (int i = 0; i < dim_; ++i) {
 		xbox_query[i] = lambda * query[i];
 	}
@@ -105,20 +106,22 @@ int XBox::kmip(						// c-k-AMIP search
 	// -------------------------------------------------------------------------
 	//  conduct c-k-ANN search by qalsh
 	// -------------------------------------------------------------------------
-	MinK_List *nn_list = new MinK_List(top_k);
-	lsh_->knn(top_k, MAXREAL, (const float *) xbox_query, nn_list);
+	std::vector<int> cand;
+	lsh_->knn(top_k, MAXREAL, (const float *) xbox_query, cand);
 
 	// -------------------------------------------------------------------------
 	//  calc inner product for candidates returned by qalsh
 	// -------------------------------------------------------------------------
-	for (int i = 0; i < top_k; ++i) {
-		int   id = nn_list->ith_id(i);
-		float ip = calc_inner_product(dim_, data_[id], query);
-
-		list->insert(ip, id + 1);
+	int size = (int) cand.size();
+	for (int i = 0; i < size; ++i) {
+		int id = cand[i];
+		if (norm_d_[id][0] * normq <= kip) break;
+			
+		float ip = calc_inner_product(dim_, kip, data_[id], norm_d_[id], 
+			query, norm_q);
+		kip = list->insert(ip, id + 1);
 	}
 	delete[] xbox_query; xbox_query = NULL;
-	delete nn_list; nn_list = NULL;
 
 	return 0;
 }

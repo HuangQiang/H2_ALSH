@@ -32,7 +32,7 @@ public:
 		int   top_k,					// top-k
 		float R,						// limited search range
 		const float *query,				// input query
-		MinK_List *list);				// top-k NN results (return)
+		std::vector<int> &cand);		// NN candidates (return)
 
 protected:
 	int    n_pts_;					// number of data objects

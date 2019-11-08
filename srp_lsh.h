@@ -30,7 +30,7 @@ public:
 	int kmc(						// c-k-AMC search
 		int   top_k,					// top-k value
 		const float *query,				// input query
-		MaxK_List *list);				// top-k MC results  (return)
+		std::vector<int> &cand); 		// MCS candidates  (return)
 
 protected:
 	int   n_pts_;					// number of data objects

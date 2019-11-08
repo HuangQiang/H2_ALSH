@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/time.h>
 
 #include "def.h"
 #include "util.h"
@@ -115,17 +114,20 @@ void L2_ALSH2::display()			// display parameters
 int L2_ALSH2::kmip(					// c-k-AMIP search
 	int   top_k,						// top-k value
 	const float *query,					// input query
+	const float *norm_q,				// l2-norm of query
 	MaxK_List *list)					// top-k MIP results (return) 
 {
+	float kip   = MINREAL;
+	float normq = norm_q[0];
+
 	// -------------------------------------------------------------------------
 	//  construct L2_ALSH2 query
 	// -------------------------------------------------------------------------
 	int   exponent = -1;
 	float scale = U_ / M_;
-	float norm_q = sqrt(calc_inner_product(dim_, query, query));
 	float *l2_alsh2_query = new float[l2_alsh2_dim_];
 
-	norm_q *= scale;
+	normq *= scale;
 	for (int i = 0; i < l2_alsh2_dim_; ++i) {
 		if (i < dim_) {
 			l2_alsh2_query[i] = query[i] * scale;
@@ -135,27 +137,29 @@ int L2_ALSH2::kmip(					// c-k-AMIP search
 		}
 		else {
 			exponent = (int) pow(2.0f, i - dim_ - m_ + 1);
-			l2_alsh2_query[i] = pow(norm_q, exponent);
+			l2_alsh2_query[i] = pow(normq, exponent);
 		}
 	}
 
 	// -------------------------------------------------------------------------
 	//  conduct c-k-ANN search by qalsh
 	// -------------------------------------------------------------------------
-	MinK_List *nn_list = new MinK_List(top_k);
-	lsh_->knn(top_k, MAXREAL, l2_alsh2_query, nn_list);
+	std::vector<int> cand;
+	lsh_->knn(top_k, MAXREAL, (const float *) l2_alsh2_query, cand);
 
 	// -------------------------------------------------------------------------
 	//  calc inner product for candidates returned by qalsh
 	// -------------------------------------------------------------------------
-	for (int i = 0; i < top_k; ++i) {
-		int   id = nn_list->ith_id(i);
-		float ip = calc_inner_product(dim_, data_[id], query);
-
-		list->insert(ip, id + 1);
+	int size = (int) cand.size();
+	for (int i = 0; i < size; ++i) {
+		int id = cand[i];
+		if (norm_d_[id][0] * normq <= kip) break;
+			
+		float ip = calc_inner_product(dim_, kip, data_[id], norm_d_[id], 
+			query, norm_q);
+		kip = list->insert(ip, id + 1);
 	}
 	delete[] l2_alsh2_query; l2_alsh2_query = NULL;
-	delete nn_list; nn_list = NULL;
 
 	return 0;
 }

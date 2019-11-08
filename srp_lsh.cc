@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <vector>
 
 #include "def.h"
 #include "util.h"
@@ -121,7 +122,7 @@ void SRP_LSH::display()				// display parameters
 int SRP_LSH::kmc(					// c-k-AMC search
 	int   top_k,						// top-k value
 	const float *query,					// input query
-	MaxK_List *list)					// top-k MC results (return)
+	std::vector<int> &cand) 			// MCS candidates  (return)
 {
 	// -------------------------------------------------------------------------
 	//  calculate the hash key (compressed hash code) of query
@@ -135,6 +136,7 @@ int SRP_LSH::kmc(					// c-k-AMC search
 	// -------------------------------------------------------------------------
 	//  find the candidates with largest matched values
 	// -------------------------------------------------------------------------
+	MaxK_List *list = new MaxK_List(CANDIDATES + top_k - 1);
 	int total_bits = 64 * m_;
 	for (int i = 0; i < n_pts_; ++i) {
 		uint32_t match = 0;
@@ -143,8 +145,15 @@ int SRP_LSH::kmc(					// c-k-AMC search
 		}
 		list->insert((float) (total_bits - match), i);
 	}
+
+	int size = list->size();
+	for (int i = 0; i < size; ++i) {
+		cand.push_back(list->ith_id(i));
+	}
+
 	delete[] hash_code_q; hash_code_q = NULL;
 	delete[] hash_key_q;  hash_key_q  = NULL;
+	delete list; list = NULL;
 
 	return 0;
 }
