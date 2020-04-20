@@ -1,17 +1,4 @@
-#include <algorithm>
-#include <sys/time.h>
-
-#include "def.h"
-#include "util.h"
-#include "pri_queue.h"
-#include "l2_alsh.h"
-#include "l2_alsh2.h"
-#include "xbox.h"
-#include "sign_alsh.h"
-#include "simple_lsh.h"
-#include "h2_alsh.h"
 #include "amips.h"
-
 
 // -----------------------------------------------------------------------------
 int linear_scan(					// k-MIP search by linear scan
@@ -123,7 +110,9 @@ int l2_alsh(						// k-MIP search by l2_alsh
 	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Indexing Time = %f Seconds\n\n", indexing_time);
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by L2_ALSH
@@ -173,6 +162,7 @@ int l2_alsh(						// k-MIP search by l2_alsh
 	//  release space
 	// -------------------------------------------------------------------------
 	delete lsh; lsh = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }
@@ -212,7 +202,9 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Indexing Time = %f Seconds\n\n", indexing_time);
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by L2_ALSH2
@@ -262,6 +254,7 @@ int l2_alsh2(						// k-MIP search by l2_alsh2
 	//  release space
 	// -------------------------------------------------------------------------
 	delete lsh; lsh = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }
@@ -303,7 +296,8 @@ int xbox(							// k-MIP search by xbox
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	printf("Top-k c-AMIP of XBox: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
@@ -349,13 +343,14 @@ int xbox(							// k-MIP search by xbox
 	// -------------------------------------------------------------------------
 	//  k-MIP search by H2-ALSH-
 	// -------------------------------------------------------------------------	
-	sprintf(output_set, "%sh2_alsh_minus.mip", out_path);
+	sprintf(output_set, "%sh2_alsh-.mip", out_path);
 	fp = fopen(output_set, "a+");
 	if (!fp) {
 		printf("Could not create %s\n", output_set);
 		return 1;
 	}
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	printf("Top-k c-AMIP of H2-ALSH-: \n");
 	printf("  Top-k\t\tRatio\t\tTime (ms)\tRecall\n");
@@ -402,6 +397,7 @@ int xbox(							// k-MIP search by xbox
 	//  release space
 	// -------------------------------------------------------------------------
 	delete xbox; xbox = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }
@@ -441,7 +437,9 @@ int sign_alsh(						// k-MIP search by sign_alsh
 	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Indexing Time = %f Seconds\n\n", indexing_time);
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by Sign_ALSH
@@ -491,6 +489,7 @@ int sign_alsh(						// k-MIP search by sign_alsh
 	//  release space
 	// -------------------------------------------------------------------------
 	delete lsh; lsh = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }
@@ -528,7 +527,9 @@ int simple_lsh(						// k-MIP search by simple_lsh
 	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Indexing Time = %f Seconds\n\n", indexing_time);
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by Simple_LSH
@@ -578,6 +579,7 @@ int simple_lsh(						// k-MIP search by simple_lsh
 	//  release space
 	// -------------------------------------------------------------------------
 	delete lsh; lsh = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }
@@ -616,7 +618,9 @@ int h2_alsh(						// k-MIP search by h2_alsh
 	float indexing_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
 	printf("Indexing Time = %f Seconds\n\n", indexing_time);
-	fprintf(fp, "Indexing Time = %f Seconds\n\n", indexing_time);
+	
+	fprintf(fp, "index_time = %f Seconds\n", indexing_time);
+	fprintf(fp, "memory     = %f MB\n", g_memory / 1048576.0f);
 
 	// -------------------------------------------------------------------------
 	//  k-MIP search by H2_ALSH
@@ -666,6 +670,7 @@ int h2_alsh(						// k-MIP search by h2_alsh
 	//  release space
 	// -------------------------------------------------------------------------
 	delete lsh; lsh = NULL;
+	assert(g_memory == 0);
 
 	return 0;
 }

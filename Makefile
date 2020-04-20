@@ -1,4 +1,4 @@
-SRCS=util.cc random.cc pri_queue.cc qalsh.cc srp_lsh.cc l2_alsh.cc \
+SRCS=random.cc pri_queue.cc util.cc qalsh.cc srp_lsh.cc l2_alsh.cc \
 	l2_alsh2.cc xbox.cc simple_lsh.cc sign_alsh.cc h2_alsh.cc \
 	amips.cc pre_recall.cc main.cc
 OBJS=${SRCS:.cc=.o}
@@ -11,11 +11,11 @@ CPPFLAGS=-w -O3
 all: ${OBJS}
 	${CXX} ${CPPFLAGS} -o alsh ${OBJS}
 
-util.o: util.h
-
 random.o: random.h
 
 pri_queue.o: pri_queue.h
+
+util.o: util.h
 
 qalsh.o: qalsh.h
 

@@ -1,6 +1,12 @@
 #ifndef __RANDOM_H
 #define __RANDOM_H
 
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+
+#include "def.h"
+
 // -----------------------------------------------------------------------------
 inline float uniform(				// r.v. from Uniform(min, max)
 	float min,							// min value

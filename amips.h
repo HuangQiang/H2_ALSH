@@ -1,6 +1,21 @@
 #ifndef __AMIPS_H
 #define __AMIPS_H
 
+#include <iostream>
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "h2_alsh.h"
+#include "l2_alsh.h"
+#include "l2_alsh2.h"
+#include "xbox.h"
+#include "sign_alsh.h"
+#include "simple_lsh.h"
+
+struct Result;
 
 // -----------------------------------------------------------------------------
 int linear_scan(					// k-MIP search by linear scan

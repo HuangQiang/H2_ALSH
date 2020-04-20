@@ -1,9 +1,48 @@
-#include <cstring>
-#include <sys/time.h>
-
-#include "def.h"
-#include "util.h"
 #include "pri_queue.h"
+
+// -----------------------------------------------------------------------------
+int ResultComp(						// cmp func for qsort (ascending)
+	const void *e1,						// 1st element
+	const void *e2)						// 2nd element
+{
+	int ret = 0;
+	Result *item1 = (Result*) e1;
+	Result *item2 = (Result*) e2;
+
+	if (item1->key_ < item2->key_) {
+		ret = -1;
+	} 
+	else if (item1->key_ > item2->key_) {
+		ret = 1;
+	} 
+	else {
+		if (item1->id_ < item2->id_) ret = -1;
+		else if (item1->id_ > item2->id_) ret = 1;
+	}
+	return ret;
+}
+
+// -----------------------------------------------------------------------------
+int ResultCompDesc(					// cmp func for qsort (descending)
+	const void *e1,						// 1st element
+	const void *e2)						// 2nd element
+{
+	int ret = 0;
+	Result *item1 = (Result*) e1;
+	Result *item2 = (Result*) e2;
+
+	if (item1->key_ < item2->key_) {
+		ret = 1;
+	} 
+	else if (item1->key_ > item2->key_) {
+		ret = -1;
+	} 
+	else {
+		if (item1->id_ < item2->id_) ret = -1;
+		else if (item1->id_ > item2->id_) ret = 1;
+	}
+	return ret;
+}
 
 // -----------------------------------------------------------------------------
 MinK_List::MinK_List(				// constructor (given max size)

@@ -1,6 +1,17 @@
 #ifndef __L2_ALSH_H
 #define __L2_ALSH_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+
 class QALSH;
 class MaxK_List;
 
@@ -13,9 +24,8 @@ class MaxK_List;
 //  (MIPS)", In Advances in Neural Information Processing Systems (NIPS), pages
 //  2321–2329, 2014.
 //  
-//  notice that in order to make a fair comparison with H2-ALSH, we apply 
-//  QALSH for ANN search after converting MIP search to NN search by the 
-//  L2_ALSH transformation.
+//  notice that to make a fair comparison with H2-ALSH, we apply QALSH for 
+//  ANN search after converting MIP search to NN search by L2_ALSH transformation.
 // -----------------------------------------------------------------------------
 class L2_ALSH {
 public:
@@ -46,17 +56,10 @@ protected:
 	int   dim_;						// dimensionality
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	float nn_ratio_;				// approximation ratio for ANN search
+	float M_;						// max norm of data
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
-
-	float M_;						// max norm of data
-	int   l2_alsh_dim_;				// dimension of l2_alsh data (dim_ + m_)
-	float **l2_alsh_data_;			// l2_alsh data
 	QALSH *lsh_;					// qalsh
-
-	// -------------------------------------------------------------------------
-	void bulkload();				// bulkloading
 };
 
 #endif // __L2_ALSH_H

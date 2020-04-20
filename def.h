@@ -1,6 +1,8 @@
 #ifndef __DEF_H
 #define __DEF_H
 
+#include <iostream>
+
 // -----------------------------------------------------------------------------
 //  Macros
 // -----------------------------------------------------------------------------
@@ -14,10 +16,10 @@
 // -----------------------------------------------------------------------------
 //  Constants
 // -----------------------------------------------------------------------------
-const int   TOPK[]        = { 1, 2, 5, 10 };
+const int   TOPK[]        = { 1,2,5,10 };
 const int   MAX_ROUND     = 4;
-const int   MAXK          = TOPK[MAX_ROUND - 1];
-const int   tMIPs[]       = { 1, 2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 500, 1000 };
+const int   MAXK          = TOPK[MAX_ROUND-1];
+const int   tMIPs[]       = { 1,2,5,10,20,30,40,50,60,70,80,90,100,200,500,1000 };
 const int   MAX_T         = 16;
 
 const int   NORM_K        = 3;
@@ -36,11 +38,11 @@ const int   SIZEINT       = (int) sizeof(int);
 const int   SIZECHAR      = (int) sizeof(char);
 const int   SIZEFLOAT     = (int) sizeof(float);
 const int   SIZEDOUBLE    = (int) sizeof(double);
+const int   SIZEUINT64    = (int) sizeof(uint64_t);
 
 const float E             = 2.7182818F;
 const float PI            = 3.141592654F;
 const float FLOATZERO     = 1e-6F;
 const float ANGLE         = PI / 8.0f;
-
 
 #endif // __DEF_H

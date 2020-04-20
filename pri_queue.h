@@ -1,7 +1,35 @@
 #ifndef __PRI_QUEUE_H
 #define __PRI_QUEUE_H
 
-struct Result;
+#include <algorithm>
+#include "def.h"
+
+// -----------------------------------------------------------------------------
+//  struct Result
+// -----------------------------------------------------------------------------
+struct Result {						// structure for furthest neighbor / hash value
+	float key_;							// distance / random projection value
+	int   id_;							// object id
+};
+
+// -----------------------------------------------------------------------------
+inline int cmp(						// cmp func for lower_bound (ascending)
+	Result a, 							// 1st element
+	Result b)							// 2nd element
+{
+	return a.key_ < b.key_;
+}
+
+// -----------------------------------------------------------------------------
+int ResultComp(						// compare function for qsort (ascending)
+	const void *e1,						// 1st element
+	const void *e2);					// 2nd element
+
+// -----------------------------------------------------------------------------
+int ResultCompDesc(					// compare function for qsort (descending)
+	const void *e1,						// 1st element
+	const void *e2);					// 2nd element
+
 
 // -----------------------------------------------------------------------------
 //  MinK_List: a structure which maintains the smallest k values (of type float)
@@ -45,6 +73,7 @@ protected:
 	int    num_;					// number of key current active
 	Result *list_;					// the list itself
 };
+
 
 // -----------------------------------------------------------------------------
 //  MaxK_List: An MaxK_List structure is one which maintains the largest k 

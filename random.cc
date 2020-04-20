@@ -1,7 +1,3 @@
-#include <algorithm>
-#include <cmath>
-
-#include "def.h"
 #include "random.h"
 
 // -----------------------------------------------------------------------------

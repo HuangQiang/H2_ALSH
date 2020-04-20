@@ -1,9 +1,4 @@
-#include <algorithm>
 
-#include "def.h"
-#include "util.h"
-#include "pri_queue.h"
-#include "qalsh.h"
 #include "h2_alsh.h"
 
 // -----------------------------------------------------------------------------
@@ -18,98 +13,104 @@ H2_ALSH::H2_ALSH(					// constructor
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	n_pts_     = n;	
-	dim_       = d;
-	nn_ratio_  = nn_ratio;
-	mip_ratio_ = mip_ratio;
-	data_      = data;
-	norm_d_	   = norm_d;
+	n_pts_  = n;	
+	dim_    = d;
+	ratio_  = mip_ratio;
+	data_   = data;
+	norm_d_	= norm_d;
 
 	// -------------------------------------------------------------------------
-	//  build index
+	//  sort data objects by their Euclidean norms under the ascending order
 	// -------------------------------------------------------------------------
-	bulkload();
+	g_memory += sizeof(Result) * n;
+	Result *order = new Result[n];
+	for (int i = 0; i < n; ++i) {
+		order[i].key_ = norm_d_[i][0];
+		order[i].id_  = i;			// data object id		
+	}
+	qsort(order, n, sizeof(Result), ResultCompDesc);
+
+	g_memory += SIZEINT * n;
+	h2_alsh_id_ = new int[n];
+	for (int i = 0; i < n; ++i) h2_alsh_id_[i] = order[i].id_;
+
+	M_ = order[0].key_;
+	b_ = sqrt((pow(nn_ratio,4.0f) - 1) / (pow(nn_ratio,4.0f) - mip_ratio));
+
+	// -------------------------------------------------------------------------
+	//  divide datasets into blocks and build qalsh for each block
+	// -------------------------------------------------------------------------
+	g_memory += SIZEFLOAT * (d + 1);
+	float *h2_alsh_data = new float[d + 1];
+	int   start = 0;
+
+	while (start < n) {
+		// divide one block
+		float M = order[start].key_;
+		float min_radius = M * b_, M_sqr = SQR(M);
+		int   idx = start, cnt = 0;
+
+		while (idx < n && order[idx].key_ >= min_radius) {
+			++idx;
+			if (++cnt >= MAX_BLOCK_NUM) break;
+		}
+
+		// build qalsh for this block
+		Block *block  = new Block();
+		block->n_pts_ = cnt;
+		block->M_     = M;
+		block->index_ = h2_alsh_id_ + start;
+
+		if (cnt > N_THRESHOLD) {
+			block->lsh_ = new QALSH(cnt, d + 1, nn_ratio);
+			
+			// build hash tables for qalsh
+			int m = block->lsh_->m_;
+			for (int i = 0; i < cnt; ++i) {
+				// construct new format of data by h2_alsh transformation
+				int id = block->index_[i];
+				for (int j = 0; j < d; ++j) {
+					h2_alsh_data[j] = data[id][j];
+				}
+				h2_alsh_data[d] = sqrt(M_sqr - SQR(norm_d[id][0]));
+
+				// calc hash value for new format of data
+				for (int j = 0; j < m; ++j) {
+					float val = block->lsh_->calc_hash_value(j, h2_alsh_data);
+					block->lsh_->tables_[j][i].id_  = i;
+					block->lsh_->tables_[j][i].key_ = val;
+				}
+			}
+			for (int i = 0; i < m; ++i) {
+				qsort(block->lsh_->tables_[i], cnt, sizeof(Result), ResultComp);
+			}
+		}
+		blocks_.push_back(block);
+		start += cnt;
+	}
+	num_blocks_ = (int) blocks_.size();
+	assert(start == n);
+	
+	// -------------------------------------------------------------------------
+	//  release space
+	// -------------------------------------------------------------------------
+	delete[] order; order = NULL;
+	delete[] h2_alsh_data; h2_alsh_data = NULL;
+
+	g_memory -= sizeof(Result) * n;
+	g_memory -= SIZEFLOAT * (d + 1);
 }
 
 // -----------------------------------------------------------------------------
 H2_ALSH::~H2_ALSH()					// destructor
 {
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] h2_alsh_data_[i]; h2_alsh_data_[i] = NULL;
-	}
-	delete[] h2_alsh_data_; h2_alsh_data_ = NULL;
-
+	delete[] h2_alsh_id_; h2_alsh_id_ = NULL; 
+	g_memory -= SIZEINT * n_pts_;
+	
 	for (int i = 0; i < num_blocks_; ++i) {
 		delete blocks_[i]; blocks_[i] = NULL;
 	}
 	blocks_.clear(); blocks_.shrink_to_fit();
-}
-
-// -----------------------------------------------------------------------------
-void H2_ALSH::bulkload()			// bulkloading
-{
-	// -------------------------------------------------------------------------
-	//  sort data objects by their Euclidean norms under the ascending order
-	// -------------------------------------------------------------------------
-	Result *order = new Result[n_pts_];
-	for (int i = 0; i < n_pts_; ++i) {
-		order[i].key_ = norm_d_[i][0];
-		order[i].id_  = i;			// data object id		
-	}
-	qsort(order, n_pts_, sizeof(Result), ResultCompDesc);
-
-	M_ = order[0].key_;
-	b_ = sqrt((pow(nn_ratio_,4.0f) - 1) / (pow(nn_ratio_,4.0f) - mip_ratio_));
-
-	// -------------------------------------------------------------------------
-	//  construct new data
-	// -------------------------------------------------------------------------
-	h2_alsh_data_ = new float*[n_pts_];
-	num_blocks_ = 0;
-
-	int i = 0;
-	while (i < n_pts_) {
-		int   n     = 0;
-		float M     = order[i].key_;
-		float m     = M * b_;
-		float M_sqr = M * M;
-
-		while (i < n_pts_) {
-			if (n >= MAX_BLOCK_NUM) break;
-
-			float norm_d = order[i].key_;
-			if (norm_d < m) break;
-
-			int id = order[i].id_;
-			float *data = new float[dim_ + 1];
-			for (int j = 0; j < dim_; ++j) {
-				data[j] = data_[id][j];
-			}
-			data[dim_]= sqrt(M_sqr - norm_d * norm_d);
-			h2_alsh_data_[i] = data; 
-			++i; ++n;
-		}
-
-		Block *block = new Block();
-		block->n_pts_ = n;
-		block->M_     = M;
-
-		int *index = new int[n];
-		Result *tmp = &order[i - n];
-		for (int j = 0; j < n; ++j) {
-			index[j] = tmp[j].id_;
-		}
-		block->index_ = index;
-
-		if (n > N_THRESHOLD) {
-			int start = i - n;
-			block->lsh_ = new QALSH(n, dim_ + 1, nn_ratio_, 
-				(const float **) h2_alsh_data_ + start);
-		}
-		blocks_.push_back(block);
-		++num_blocks_;
-	}
-	delete[] order; order = NULL;
 }
 
 // -------------------------------------------------------------------------
@@ -118,8 +119,7 @@ void H2_ALSH::display()				// display parameters
 	printf("Parameters of H2_ALSH:\n");
 	printf("    n          = %d\n",   n_pts_);
 	printf("    d          = %d\n",   dim_);
-	printf("    c0         = %.1f\n", nn_ratio_);
-	printf("    c          = %.1f\n", mip_ratio_);
+	printf("    c          = %.1f\n", ratio_);
 	printf("    M          = %f\n",   M_);
 	printf("    num_blocks = %d\n\n", num_blocks_);
 }

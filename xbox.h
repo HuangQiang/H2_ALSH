@@ -1,6 +1,17 @@
 #ifndef __XBOX_H
 #define __XBOX_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+
 class QALSH;
 class MaxK_List;
 
@@ -14,9 +25,8 @@ class MaxK_List;
 //  transformation for inner-product spaces", In Proceedings of the 8th ACM 
 //  Conference on Recommender systems, pages 257–264, 2014.
 //
-//  notice that in order to make a fair comparison with H2-ALSH, we apply 
-//  QALSH for ANN search after converting MIP search to NN search by the 
-//  XBox transformation.
+//  notice that to make a fair comparison with H2-ALSH, we apply QALSH for 
+//  ANN search after converting MIP search to NN search by XBox transformation.
 // -----------------------------------------------------------------------------
 class XBox {
 public:
@@ -44,16 +54,10 @@ public:
 protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimensionality
-	float nn_ratio_;				// approximation ratio for ANN search
+	float M_;						// max norm of data objects
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
-
-	float M_;						// max norm of data objects
-	float **xbox_data_;				// xbox data
 	QALSH *lsh_;					// qalsh
-
-	// -------------------------------------------------------------------------
-	void bulkload();				// bulkloading
 };
 
 #endif // __XBOX_H

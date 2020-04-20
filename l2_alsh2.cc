@@ -1,9 +1,3 @@
-#include <algorithm>
-
-#include "def.h"
-#include "util.h"
-#include "pri_queue.h"
-#include "qalsh.h"
 #include "l2_alsh2.h"
 
 // -----------------------------------------------------------------------------
@@ -25,41 +19,26 @@ L2_ALSH2::L2_ALSH2(					// constructor
 	dim_          = d;
 	m_            = m;
 	U_            = U;
-	nn_ratio_     = nn_ratio;
 	data_         = data;
 	norm_d_       = norm_d;
 	norm_q_       = norm_q;
-	l2_alsh2_dim_ = d + 2 * m;	
 
 	// -------------------------------------------------------------------------
-	//  build index
+	//  indexing the new format of data using qalsh
 	// -------------------------------------------------------------------------
-	bulkload(qn, norm_q);
-}
-
-// -----------------------------------------------------------------------------
-L2_ALSH2::~L2_ALSH2()				// destructor
-{
-	delete lsh_; lsh_ = NULL;
-	for (int i = 0; i < n_pts_; ++i) {
-		delete[] l2_alsh2_data_[i]; l2_alsh2_data_[i] = NULL;
-	}
-	delete[] l2_alsh2_data_; l2_alsh2_data_ = NULL;
-}
-
-// -----------------------------------------------------------------------------
-void L2_ALSH2::bulkload(			// pre-processing of data
-	int   qn,							// number of queries
-	const float** norm_q)				// queries
-{
+	int l2_alsh2_dim = d + 2 * m;
+	lsh_ = new QALSH(n, l2_alsh2_dim, nn_ratio); 
+	lsh_->display();
+	
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of 
 	//  data objects and queries
 	// -------------------------------------------------------------------------
-	std::vector<float> norm(n_pts_, 0.0f);
+	g_memory += SIZEFLOAT * n;
+	float *norm = new float[n];
 	M_ = MINREAL;
-	for (int i = 0; i < n_pts_; ++i) {
-		norm[i] = norm_d_[i][0];
+	for (int i = 0; i < n; ++i) {
+		norm[i] = norm_d[i][0];
 		if (norm[i] > M_) M_ = norm[i];
 	}
 
@@ -70,32 +49,51 @@ void L2_ALSH2::bulkload(			// pre-processing of data
 	// -------------------------------------------------------------------------
 	//  construct new format of data
 	// -------------------------------------------------------------------------
-	float scale = U_ / M_;
+	g_memory += SIZEFLOAT * l2_alsh2_dim;
+	float *l2_alsh2_data = new float[l2_alsh2_dim];
+	float scale = U / M_;
 	int   exponent = -1;
-
-	l2_alsh2_data_ = new float*[n_pts_];
-	for (int i = 0; i < n_pts_; ++i) {
-		l2_alsh2_data_[i] = new float[l2_alsh2_dim_];
-
+	int   lsh_m = lsh_->m_;
+	
+	for (int i = 0; i < n; ++i) {
+		// construct new format of data by l2_alsh2 transformation
 		norm[i] *= scale;
-		for (int j = 0; j < l2_alsh2_dim_; ++j) {
-			if (j < dim_) {
-				l2_alsh2_data_[i][j] = data_[i][j] * scale;
+		for (int j = 0; j < l2_alsh2_dim; ++j) {
+			if (j < d) {
+				l2_alsh2_data[j] = data_[i][j] * scale;
 			}
-			else if (j < dim_ + m_) {
-				exponent = (int) pow(2.0f, j - dim_ + 1);
-				l2_alsh2_data_[i][j] = pow(norm[i], exponent);
+			else if (j < d + m) {
+				exponent = (int) pow(2.0f, j - d + 1);
+				l2_alsh2_data[j] = pow(norm[i], exponent);
 			}
 			else {
-				l2_alsh2_data_[i][j] = 0.5f;
+				l2_alsh2_data[j] = 0.5f;
 			}
 		}
+		// calc hash value for new format of data
+		for (int j = 0; j < lsh_m; ++j) {
+			lsh_->tables_[j][i].id_  = i;
+			lsh_->tables_[j][i].key_ = lsh_->calc_hash_value(j, l2_alsh2_data);
+		}
+	}
+	for (int i = 0; i < lsh_m; ++i) {
+		qsort(lsh_->tables_[i], n, sizeof(Result), ResultComp);
 	}
 
 	// -------------------------------------------------------------------------
-	//  indexing the new format of data using qalsh
+	//  release space
 	// -------------------------------------------------------------------------
-	lsh_ = new QALSH(n_pts_, l2_alsh2_dim_, nn_ratio_, (const float **) l2_alsh2_data_);
+	delete[] norm; norm = NULL;
+	delete[] l2_alsh2_data; l2_alsh2_data = NULL;
+
+	g_memory -= SIZEFLOAT * n;
+	g_memory -= SIZEFLOAT * l2_alsh2_dim;
+}
+
+// -----------------------------------------------------------------------------
+L2_ALSH2::~L2_ALSH2()				// destructor
+{
+	delete lsh_; lsh_ = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -106,8 +104,8 @@ void L2_ALSH2::display()			// display parameters
 	printf("    d  = %d\n",   dim_);
 	printf("    m  = %d\n",   m_);
 	printf("    U  = %.2f\n", U_);
-	printf("    c0 = %.1f\n", nn_ratio_);
-	printf("    M  = %f\n\n", M_);
+	printf("    M  = %f\n",   M_);
+	printf("\n");
 }
 
 // -----------------------------------------------------------------------------
@@ -117,18 +115,17 @@ int L2_ALSH2::kmip(					// c-k-AMIP search
 	const float *norm_q,				// l2-norm of query
 	MaxK_List *list)					// top-k MIP results (return) 
 {
-	float kip   = MINREAL;
-	float normq = norm_q[0];
-
 	// -------------------------------------------------------------------------
 	//  construct L2_ALSH2 query
 	// -------------------------------------------------------------------------
+	int   l2_alsh2_dim = dim_ + 2 * m_;
 	int   exponent = -1;
 	float scale = U_ / M_;
-	float *l2_alsh2_query = new float[l2_alsh2_dim_];
+	float normq = norm_q[0];
+	float *l2_alsh2_query = new float[l2_alsh2_dim];
 
 	normq *= scale;
-	for (int i = 0; i < l2_alsh2_dim_; ++i) {
+	for (int i = 0; i < l2_alsh2_dim; ++i) {
 		if (i < dim_) {
 			l2_alsh2_query[i] = query[i] * scale;
 		}
@@ -150,7 +147,8 @@ int L2_ALSH2::kmip(					// c-k-AMIP search
 	// -------------------------------------------------------------------------
 	//  calc inner product for candidates returned by qalsh
 	// -------------------------------------------------------------------------
-	int size = (int) cand.size();
+	float kip  = MINREAL;
+	int   size = (int) cand.size();
 	for (int i = 0; i < size; ++i) {
 		int id = cand[i];
 		if (norm_d_[id][0] * normq <= kip) break;

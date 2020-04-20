@@ -1,8 +1,19 @@
 #ifndef __QALSH_H
 #define __QALSH_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cstring>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "random.h"
+#include "pri_queue.h"
+
 struct Result;
-class  MinK_List;
 
 // -----------------------------------------------------------------------------
 //  Query-Aware Locality-Sensitive Hashing (QALSH) is used to solve the problem 
@@ -18,11 +29,15 @@ public:
 	QALSH(							// constructor
 		int   n,						// number of data objects
 		int   d,						// dimensionality
-		float ratio,					// approximation ratio
-		const float **data);			// data objects
+		float ratio);					// approximation ratio
 
 	// -------------------------------------------------------------------------
 	~QALSH();						// destructor
+
+	// -------------------------------------------------------------------------
+	float calc_hash_value(			// calc hash value
+		int   tid,						// table id
+		const float *data);				// input data
 
 	// -------------------------------------------------------------------------
 	void display();					// display parameters
@@ -34,31 +49,17 @@ public:
 		const float *query,				// input query
 		std::vector<int> &cand);		// NN candidates (return)
 
-protected:
-	int    n_pts_;					// number of data objects
-	int    dim_;					// dimensionality
-	float  appr_ratio_;				// approximation ratio
-	const  float **data_;			// data objects
-
+	// -------------------------------------------------------------------------
+	int    n_;						// number of data objects
+	int    d_;						// dimensionality
+	float  ratio_;					// approximation ratio
 	float  w_;						// bucket width
-	float  p1_;						// positive probability
-	float  p2_;						// negative probability
-	float  alpha_;					// collision threshold percentage
-	float  beta_;					// false positive percentage
-	float  delta_;					// error probability
 	int    m_;						// number of hash tables
 	int    l_;						// collision threshold
 	float  **a_;					// lsh functions
 	Result **tables_;				// hash tables
 
-	int    *freq_;					// frequency		
-	int    *lpos_;					// left  position of hash table
-	int    *rpos_;					// right position of hash table
-	bool   *checked_;				// whether checked
-	bool   *bucket_flag_;			// bucket flag
-	bool   *range_flag_;			// range flag
-	float  *q_val_;					// hash value of query
-
+protected:
 	// -------------------------------------------------------------------------
 	float calc_p(					// calc probability
 		float x);						// x = w / (2.0 * r)

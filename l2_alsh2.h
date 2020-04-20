@@ -1,6 +1,17 @@
 #ifndef __L2_ALSH2_H
 #define __L2_ALSH2_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+
 class QALSH;
 class MaxK_List;
 
@@ -55,20 +66,13 @@ protected:
 	int   dim_;						// dimensionality
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
-	float nn_ratio_;				// approximation ratio for ANN search
+	float M_;						// max norm of data and query
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
 	const float **norm_q_;			// l2-norm of query objects
-
-	float M_;						// max norm of data and query
-	int   l2_alsh2_dim_;			// dim of l2_alsh2 data (dim_ + 2 * m_)
-	float **l2_alsh2_data_;			// l2_alsh2 data
+	// int   l2_alsh2_dim_;			// dim of l2_alsh2 data (dim_ + 2 * m_)
+	// float **l2_alsh2_data_;			// l2_alsh2 data
 	QALSH *lsh_;					// qalsh
-
-	// -------------------------------------------------------------------------
-	void bulkload(					// bulkloading
-		int   qn,						// number of queries
-		const float **query);			// queries
 };
 
 #endif // __L2_ALSH2_H

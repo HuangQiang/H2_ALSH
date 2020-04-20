@@ -1,6 +1,17 @@
 #ifndef __SIMPLE_LSH_H
 #define __SIMPLE_LSH_H
 
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <cassert>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "srp_lsh.h"
+
 class SRP_LSH;
 class MaxK_List;
 
@@ -38,16 +49,10 @@ public:
 protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimensionality
-	int   K_;						// number of hash tables
+	float M_;						// max l2-norm of data objects
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
-	
-	float M_;						// max l2-norm of data objects
-	float **simple_lsh_data_;		// simple_lsh data
 	SRP_LSH *lsh_;					// SRP_LSH
-
-	// -------------------------------------------------------------------------
-	void bulkload();				// bulkloading
 };
 
 #endif // __SIMPLE_LSH_H

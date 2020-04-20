@@ -1,12 +1,3 @@
-#include <algorithm>
-#include <sys/time.h>
-
-#include "def.h"
-#include "util.h"
-#include "pri_queue.h"
-#include "sign_alsh.h"
-#include "simple_lsh.h"
-#include "h2_alsh.h"
 #include "pre_recall.h"
 
 // -----------------------------------------------------------------------------

@@ -1,69 +1,12 @@
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstring>
-#include <vector>
-
-#include <sys/time.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include "def.h"
 #include "util.h"
-#include "pri_queue.h"
 
 timeval g_start_time;
 timeval g_end_time;
 
-float g_runtime = -1.0f;
-float g_ratio   = -1.0f;
-float g_recall  = -1.0f;
-
-// -----------------------------------------------------------------------------
-int ResultComp(						// cmp func for qsort (ascending)
-	const void *e1,						// 1st element
-	const void *e2)						// 2nd element
-{
-	int ret = 0;
-	Result *item1 = (Result*) e1;
-	Result *item2 = (Result*) e2;
-
-	if (item1->key_ < item2->key_) {
-		ret = -1;
-	} 
-	else if (item1->key_ > item2->key_) {
-		ret = 1;
-	} 
-	else {
-		if (item1->id_ < item2->id_) ret = -1;
-		else if (item1->id_ > item2->id_) ret = 1;
-	}
-	return ret;
-}
-
-// -----------------------------------------------------------------------------
-int ResultCompDesc(					// cmp func for qsort (descending)
-	const void *e1,						// 1st element
-	const void *e2)						// 2nd element
-{
-	int ret = 0;
-	Result *item1 = (Result*) e1;
-	Result *item2 = (Result*) e2;
-
-	if (item1->key_ < item2->key_) {
-		ret = 1;
-	} 
-	else if (item1->key_ > item2->key_) {
-		ret = -1;
-	} 
-	else {
-		if (item1->id_ < item2->id_) ret = -1;
-		else if (item1->id_ > item2->id_) ret = 1;
-	}
-	return ret;
-}
+uint64_t g_memory  = 0;
+float    g_runtime = -1.0f;
+float    g_ratio   = -1.0f;
+float    g_recall  = -1.0f;
 
 // -----------------------------------------------------------------------------
 void create_dir(					// create dir if the path exists
@@ -88,12 +31,12 @@ void create_dir(					// create dir if the path exists
 }
 
 // -----------------------------------------------------------------------------
-int read_data(						// read data from disk
+int read_txt_data(					// read data (text) from disk
 	int   n,							// number of data objects
 	int   d,							// dimensionality
 	const char *fname,					// address of data set
 	float **data,						// data objects (return)
-	float **norm_d) 					// l2-norm of data objects (return)
+	float **norm_d)						// l2-norm of data objects (return)
 {
 	gettimeofday(&g_start_time, NULL);
 	FILE *fp = fopen(fname, "r");
@@ -115,7 +58,7 @@ int read_data(						// read data from disk
 
 			norm_d[i][0] += tmp*tmp;
 			for (int t = 1; t < NORM_K; ++t) {
-				if (j < 8*t)  norm_d[i][t] += tmp*tmp;
+				if (j < 8*t) norm_d[i][t] += tmp*tmp;
 			}
 		}
 		fscanf(fp, "\n");
@@ -127,6 +70,52 @@ int read_data(						// read data from disk
 		++i;
 	}
 	assert(feof(fp) && i == n);
+	fclose(fp);
+
+	gettimeofday(&g_end_time, NULL);
+	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
+		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
+	printf("Read Data: %f Seconds\n\n", running_time);
+
+	return 0;
+}
+
+// -----------------------------------------------------------------------------
+int read_bin_data(					// read data (binary) from disk
+	int   n,							// number of data objects
+	int   d,							// dimensionality
+	const char *fname,					// address of data
+	float **data,						// data objects (return)
+	float **norm_d)						// l2-norm of data objects (return)
+{
+	gettimeofday(&g_start_time, NULL);
+	FILE *fp = fopen(fname, "rb");
+	if (!fp) {
+		printf("Could not open %s\n", fname);
+		return 1;
+	}
+
+	int i = 0;
+	while (!feof(fp) && i < n) {
+		fread(data[i], SIZEFLOAT, d, fp);
+
+		// calc norm_d
+		memset(norm_d[i], 0.0f, NORM_K * SIZEFLOAT);
+		float tmp = 0.0f;
+		for (int j = 0; j < d; ++j) {
+			tmp = data[i][j];
+
+			norm_d[i][0] += SQR(tmp);
+			for (int t = 1; t < NORM_K; ++t) {
+				if (j < 8 * t) norm_d[i][t] += SQR(tmp);
+			}
+		}
+		for (int t = 1; t < NORM_K; ++t) {
+			norm_d[i][t] = sqrt(norm_d[i][0] - norm_d[i][t]);
+		}
+		norm_d[i][0] = sqrt(norm_d[i][0]);
+		++i;
+	}
 	fclose(fp);
 
 	gettimeofday(&g_end_time, NULL);
@@ -313,9 +302,8 @@ float calc_recall(					// calc recall of mip results
 {
 	int i = k - 1;
 	int last = k - 1;
-	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) {
-		--i;
-	}
+	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) --i;
+	
 	return (i + 1) * 100.0f / k;
 }
 
@@ -327,9 +315,8 @@ float calc_recall(					// calc recall of mip results
 {
 	int i = k - 1;
 	int last = k - 1;
-	while (i >= 0 && R[last].key_ - result[i].key_ > FLOATZERO) {
-		--i;
-	}
+	while (i >= 0 && R[last].key_ - result[i].key_ > FLOATZERO) --i;
+
 	return (i + 1) * 100.0f / k;
 }
 
@@ -342,9 +329,8 @@ int get_hits(						// get the number of hits between two ID list
 {
 	int i = k - 1;
 	int last = t - 1;
-	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) {
-		--i;
-	}
+	while (i >= 0 && R[last].key_ - list->ith_key(i) > FLOATZERO) --i;
+
 	return MIN(t, i + 1);
 }
 

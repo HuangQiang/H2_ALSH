@@ -1,6 +1,18 @@
 #ifndef __PRE_RECALL_H
 #define __PRE_RECALL_H
 
+#include <iostream>
+#include <algorithm>
+#include <sys/time.h>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "h2_alsh.h"
+#include "sign_alsh.h"
+#include "simple_lsh.h"
+
+struct Result;
 
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh

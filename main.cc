@@ -1,3 +1,4 @@
+#include <iostream>
 #include <algorithm>
 #include <cstring>
 
@@ -219,7 +220,7 @@ int main(int nargs, char **args)
 		data[i]   = new float[d];
 		norm_d[i] = new float[NORM_K];
 	}
-	if (read_data(n, d, data_set, data, norm_d) == 1) return 1;
+	if (read_bin_data(n, d, data_set, data, norm_d) == 1) return 1;
 
 	if (alg >= 0 && alg <= 10) {
         query  = new float*[qn];
@@ -228,7 +229,7 @@ int main(int nargs, char **args)
 			query[i]  = new float[d];
 			norm_q[i] = new float[NORM_K];
 		}
-        if (read_data(qn, d, query_set, query, norm_q) == 1) return 1;
+        if (read_bin_data(qn, d, query_set, query, norm_q) == 1) return 1;
     }
 
 	if (alg >= 1 && alg <= 10) {

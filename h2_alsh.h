@@ -1,6 +1,17 @@
 #ifndef __H2_ALSH_H
 #define __H2_ALSH_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "qalsh.h"
+
 class QALSH;
 class MaxK_List;
 
@@ -14,10 +25,7 @@ struct Block {
 	QALSH *lsh_;
 
 	Block() { n_pts_ = 0; M_ = 0; index_ = NULL; lsh_ = NULL; }
-	~Block() {
-		if (index_ != NULL) { delete[] index_; index_ = NULL; }
-		if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; }
-	}
+	~Block() { if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; } }
 };
 
 // -----------------------------------------------------------------------------
@@ -51,19 +59,14 @@ public:
 protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimension of data objects
-	float nn_ratio_;				// approximation ratio for NN
-	float mip_ratio_;				// approximation ratio for MIP
-	const float **data_;			// original data objects
-	const float **norm_d_;			// l2-norm of data objects
-	
+	int   num_blocks_;				// number of blocks
+	float ratio_;					// approximation ratio for MIP
 	float b_;						// compression ratio
 	float M_;						// max norm of the data objects
-	float **h2_alsh_data_;			// h2_alsh data
-	int   num_blocks_;				// number of blocks
+	const float **data_;			// original data objects
+	const float **norm_d_;			// l2-norm of data objects
+	int   *h2_alsh_id_;				// data id after h2_alsh transformation
 	std::vector<Block*> blocks_;	// blocks
-	
-	// -------------------------------------------------------------------------
-	void bulkload();				// bulkloading
 };
 
 #endif // __H2_ALSH_H

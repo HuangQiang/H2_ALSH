@@ -1,6 +1,17 @@
 #ifndef __SIGN_ALSH_H
 #define __SIGN_ALSH_H
 
+#include <iostream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <vector>
+
+#include "def.h"
+#include "util.h"
+#include "pri_queue.h"
+#include "srp_lsh.h"
+
 class SRP_LSH;
 class MaxK_List;
 
@@ -40,19 +51,12 @@ public:
 protected:
 	int   n_pts_;					// number of data points
 	int   dim_;						// dimensionality
-	int   K_;						// number of hash tables
 	int   m_;						// additional dimension of data
 	float U_;						// scale factor
+	float M_;						// max norm of data objects
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
-
-	float M_;						// max norm of data objects
-	int   sign_alsh_dim_;			// dimension of sign_alsh data
-	float **sign_alsh_data_;		// sign_alsh data
 	SRP_LSH *lsh_;					// SRP_LSH
-
-	// -------------------------------------------------------------------------
-	void bulkload();				// bulkloading
 };
 
 #endif // __SIGN_ALSH_H
