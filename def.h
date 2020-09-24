@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 //  Macros
 // -----------------------------------------------------------------------------
@@ -43,3 +45,5 @@ const int   SCAN_SIZE     = 512;
 const int   CANDIDATES    = 100;
 const int   MAX_BLOCK_NUM = 5000;
 const int   N_THRESHOLD   = CANDIDATES * 4;
+
+} // end namespace mips
