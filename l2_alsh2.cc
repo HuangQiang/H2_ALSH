@@ -1,5 +1,7 @@
 #include "l2_alsh2.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 L2_ALSH2::L2_ALSH2(					// constructor
 	int   n,							// number of data objects
@@ -146,3 +148,5 @@ int L2_ALSH2::kmip(					// c-k-AMIP search
 
 	return 0;
 }
+
+} // end namespace mips

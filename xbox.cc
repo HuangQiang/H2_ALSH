@@ -1,5 +1,7 @@
 #include "xbox.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 XBox::XBox(							// constructor
 	int   n,							// number of data objects
@@ -116,3 +118,4 @@ int XBox::kmip(						// c-k-AMIP search
 	return 0;
 }
 
+} // end namespace mips

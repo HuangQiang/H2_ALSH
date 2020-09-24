@@ -1,5 +1,7 @@
 #include "qalsh.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 QALSH::QALSH(						// constructor
 	int   n,							// number of data objects
@@ -243,3 +245,5 @@ int QALSH::knn(						// c-k-ANN search
 
 	return 0;
 }
+
+} // end namespace mips

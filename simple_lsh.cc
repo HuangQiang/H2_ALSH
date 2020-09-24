@@ -1,5 +1,7 @@
 #include "simple_lsh.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 Simple_LSH::Simple_LSH(				// constructor
 	int   n,							// number of data
@@ -108,3 +110,5 @@ int Simple_LSH::kmip(				// c-k-AMIP search
 
 	return 0;
 }
+
+} // end namespace mips

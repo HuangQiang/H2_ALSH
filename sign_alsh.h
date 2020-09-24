@@ -11,8 +11,7 @@
 #include "pri_queue.h"
 #include "srp_lsh.h"
 
-class SRP_LSH;
-class MaxK_List;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 //  Sign-LSH is used to solve the problem of c-Approximate Maximum Inner 
@@ -66,3 +65,5 @@ protected:
 	const float **norm_d_;			// l2-norm of data objects
 	SRP_LSH *lsh_;					// SRP_LSH
 };
+
+} // end namespace mips

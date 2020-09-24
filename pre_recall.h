@@ -11,7 +11,7 @@
 #include "sign_alsh.h"
 #include "simple_lsh.h"
 
-struct Result;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
@@ -64,3 +64,5 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
 	const Result **R);					// MIP ground truth results
+
+} // end namespace mips

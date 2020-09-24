@@ -16,9 +16,8 @@
 #include "def.h"
 #include "pri_queue.h"
 
-struct Result;
-class  MaxK_List;
-
+namespace mips {
+	
 extern timeval g_start_time;		// global param: start time
 extern timeval g_end_time;			// global param: end time
 
@@ -37,6 +36,7 @@ void create_dir(					// create dir if the path exists
 int read_txt_data(					// read data (text) from disk
 	int   n,							// number of data objects
 	int   d,							// dimensionality
+	bool  flag,							// true - data; false - query
 	const char *fname,					// address of data set
 	float **data,						// data objects (return)
 	float **norm_d);					// l2-norm of data objects (return)
@@ -45,6 +45,7 @@ int read_txt_data(					// read data (text) from disk
 int read_bin_data(					// read data (binary) from disk
 	int   n,							// number of data objects
 	int   d,							// dimensionality
+	bool  flag,							// true - data; false - query
 	const char *fname,					// address of data
 	float **data,						// data objects (return)
 	float **norm_d);					// l2-norm of data objects (return)
@@ -110,13 +111,4 @@ int norm_distribution(				// analyse norm distribution of data
 	const float **norm_d,				// l2-norm of data objects
 	const char  *out_path);				// output path
 
-// -----------------------------------------------------------------------------
-int ground_truth(					// find the ground truth MIP results
-	int   n,							// number of data objects
-	int   qn,							// number of query points
-	int   d,							// dimensionality
-	const float **data,					// data objects
-	const float **norm_d,				// l2-norm of data objects
-	const float **query,				// query objects
-	const float **norm_q,				// l2-norm of query objects
-	const char  *truth_set);			// address of truth set
+} // end namespace mips

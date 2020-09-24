@@ -1,5 +1,7 @@
 #include "pre_recall.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
 	int   n,							// number of data objects
@@ -234,3 +236,4 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 	return 0;
 }
 
+} // end namespace mips

@@ -11,8 +11,7 @@
 #include "pri_queue.h"
 #include "qalsh.h"
 
-class QALSH;
-class MaxK_List;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 //  Assistant Data Structure for H2-ALSH
@@ -77,6 +76,8 @@ protected:
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
 	
-	int   *h2_alsh_id_;				// data id after h2_alsh transformation
+	int *h2_alsh_id_;				// data id after h2_alsh transformation
 	std::vector<Block*> blocks_;	// blocks
 };
+
+} // end namespace mips

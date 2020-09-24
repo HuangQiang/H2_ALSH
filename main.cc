@@ -7,6 +7,7 @@
 #include "amips.h"
 #include "pre_recall.h"
 
+using namespace mips;
 
 // -----------------------------------------------------------------------------
 void usage() 						// display the usage of this package
@@ -220,7 +221,7 @@ int main(int nargs, char **args)
 		data[i]   = new float[d];
 		norm_d[i] = new float[NORM_K];
 	}
-	if (read_bin_data(n, d, data_set, data, norm_d) == 1) return 1;
+	if (read_bin_data(n, d, true, data_set, data, norm_d)) exit(1);
 
 	if (alg >= 0 && alg <= 10) {
         query  = new float*[qn];
@@ -229,7 +230,7 @@ int main(int nargs, char **args)
 			query[i]  = new float[d];
 			norm_q[i] = new float[NORM_K];
 		}
-        if (read_bin_data(qn, d, query_set, query, norm_q) == 1) return 1;
+        if (read_bin_data(qn, d, false, query_set, query, norm_q)) exit(1);
     }
 
 	if (alg >= 1 && alg <= 10) {
@@ -237,7 +238,7 @@ int main(int nargs, char **args)
 		for (int i = 0; i < qn; ++i) {
 			R[i] = new Result[MAXK];
 		}
-		if (read_ground_truth(qn, truth_set, R) == 1) return 1;
+		if (read_ground_truth(qn, truth_set, R)) exit(1);
 	}
 
 	if (alg >= 8 && alg <= 10) {
@@ -337,36 +338,35 @@ int main(int nargs, char **args)
 	//  release space
 	// -------------------------------------------------------------------------
 	for (int i = 0; i < n; ++i) {
-		delete[] data[i];   data[i]   = NULL;
-		delete[] norm_d[i]; norm_d[i] = NULL;
+		delete[] data[i];
+		delete[] norm_d[i];
 	}
-	delete[] data;   data   = NULL;
-	delete[] norm_d; norm_d = NULL;
+	delete[] data;
+	delete[] norm_d;
 
     if (alg >= 0 && alg <= 10) {
         for (int i = 0; i < qn; ++i) {
-            delete[] query[i];  query[i]  = NULL;
-            delete[] norm_q[i]; norm_q[i] = NULL;
+            delete[] query[i];
+            delete[] norm_q[i];
         }
-        delete[] query;  query  = NULL;
-        delete[] norm_q; norm_q = NULL;
+        delete[] query;
+        delete[] norm_q;
     }
 
 	if (alg >= 1 && alg <= 10) {
 		for (int i = 0; i < qn; ++i) {
-			delete[] R[i]; R[i] = NULL;
+			delete[] R[i];
 		}
-		delete[] R; R = NULL;
+		delete[] R;
 	}
 
 	if (alg >= 8 && alg <= 10) {
 		for (int r = 0; r < MAX_ROUND; ++r) {
-			delete[] pre[r];	pre[r]    = NULL;
-			delete[] recall[r];	recall[r] = NULL;
+			delete[] pre[r];
+			delete[] recall[r];
 		}
-		delete[] pre;	 pre = NULL;
-		delete[] recall; recall = NULL;
+		delete[] pre;
+		delete[] recall;
 	}
-	
 	return 0;
 }

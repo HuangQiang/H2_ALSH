@@ -10,7 +10,7 @@
 #include "random.h"
 #include "pri_queue.h"
 
-class MaxK_List;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 //  Sign-Random Projection LSH (SRP_LSH) is used to solve the problem of 
@@ -79,3 +79,5 @@ protected:
 	uint32_t table_lookup(			// table lookup the match value
 		uint64_t x);					// input uint64_t value
 };
+
+} // end namespace mips

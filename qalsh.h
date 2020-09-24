@@ -12,7 +12,7 @@
 #include "random.h"
 #include "pri_queue.h"
 
-struct Result;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 //  Query-Aware Locality-Sensitive Hashing (QALSH) is used to solve the problem 
@@ -72,3 +72,5 @@ public:
 		return ret;
 	}
 };
+
+} // end namespace mips

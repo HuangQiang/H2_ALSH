@@ -1,5 +1,7 @@
 #include "util.h"
 
+namespace mips {
+
 timeval g_start_time;				// global param: start time
 timeval g_end_time;					// global param: end time
 
@@ -36,6 +38,7 @@ void create_dir(					// create dir if the path exists
 int read_txt_data(					// read data (text) from disk
 	int   n,							// number of data objects
 	int   d,							// dimensionality
+	bool  flag,							// true - data; false - query
 	const char *fname,					// address of data set
 	float **data,						// data objects (return)
 	float **norm_d)						// l2-norm of data objects (return)
@@ -77,7 +80,9 @@ int read_txt_data(					// read data (text) from disk
 	gettimeofday(&g_end_time, NULL);
 	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-	printf("Read Data: %f Seconds\n\n", running_time);
+	
+	if (flag) printf("Read Data : %f Seconds\n", running_time);
+	else printf("Read Query: %f Seconds\n", running_time);
 
 	return 0;
 }
@@ -86,6 +91,7 @@ int read_txt_data(					// read data (text) from disk
 int read_bin_data(					// read data (binary) from disk
 	int   n,							// number of data objects
 	int   d,							// dimensionality
+	bool  flag,							// true - data; false - query
 	const char *fname,					// address of data
 	float **data,						// data objects (return)
 	float **norm_d)						// l2-norm of data objects (return)
@@ -123,7 +129,9 @@ int read_bin_data(					// read data (binary) from disk
 	gettimeofday(&g_end_time, NULL);
 	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-	printf("Read Data: %f Seconds\n\n", running_time);
+
+	if (flag) printf("Read Data : %f Seconds\n", running_time);
+	else printf("Read Query: %f Seconds\n", running_time);
 
 	return 0;
 }
@@ -157,7 +165,7 @@ int read_ground_truth(				// read ground truth results from disk
 	gettimeofday(&g_end_time, NULL);
 	float running_time = g_end_time.tv_sec - g_start_time.tv_sec + 
 		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-	printf("Read Ground Truth: %f Seconds\n\n", running_time);
+	printf("Read Truth: %f Seconds\n\n", running_time);
 
 	return 0;
 }
@@ -421,62 +429,4 @@ int norm_distribution(				// analyse norm distribution of data
 	return 0;
 }
 
-// -----------------------------------------------------------------------------
-int ground_truth(					// find the ground truth MIP results
-	int   n,							// number of data objects
-	int   qn,							// number of query points
-	int   d,							// dimensionality
-	const float **data,					// data objects
-	const float **norm_d,				// l2-norm of data objects
-	const float **query,				// query objects
-	const float **norm_q,				// l2-norm of query objects
-	const char  *truth_set) 			// address of truth set
-{
-	gettimeofday(&g_start_time, NULL);
-	FILE *fp = fopen(truth_set, "w");
-	if (!fp) { printf("Could not create %s\n", truth_set); return 1; }
-
-	// -------------------------------------------------------------------------
-	//  calc the norm of data
-	// -------------------------------------------------------------------------
-	Result *order_d = new Result[n];
-	for (int i = 0; i < n; ++i) {
-		order_d[i].id_  = i;
-		order_d[i].key_ = norm_d[i][0];
-	}
-	qsort(order_d, n, sizeof(Result), ResultCompDesc);
-
-	// -------------------------------------------------------------------------
-	//  find ground truth results (using linear scan method)
-	// -------------------------------------------------------------------------
-	MaxK_List *list = new MaxK_List(MAXK);
-
-	fprintf(fp, "%d %d\n", qn, MAXK);
-	for (int i = 0; i < qn; ++i) {
-		float kip = MINREAL;
-		list->reset();
-		for (int j = 0; j < n; ++j) {
- 			int id = order_d[j].id_;
-			if (norm_d[id][0] * norm_q[i][0] <= kip) break;
-
-			float ip = calc_inner_product(d, kip, data[id], norm_d[id], 
-				query[i], norm_q[i]);
-			kip = list->insert(ip, id + 1);
-		}
-		for (int j = 0; j < list->size(); ++j) {
-			fprintf(fp, "%d %f ", list->ith_id(j), list->ith_key(j));
-		}
-		fprintf(fp, "\n");
-	}
-	delete[] order_d; 
-	delete   list;
-	fclose(fp);
-
-	gettimeofday(&g_end_time, NULL);
-	float truth_time = g_end_time.tv_sec - g_start_time.tv_sec + 
-		(g_end_time.tv_usec - g_start_time.tv_usec) / 1000000.0f;
-	printf("Ground Truth: %f Seconds\n\n", truth_time);
-	
-	return 0;
-}
-
+} // end namespace mips

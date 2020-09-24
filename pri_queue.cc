@@ -1,5 +1,7 @@
 #include "pri_queue.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 int ResultComp(						// cmp func for qsort (ascending)
 	const void *e1,						// 1st element
@@ -112,3 +114,5 @@ float MaxK_List::insert(			// insert item
 
 	return min_key();
 }
+
+} // end namespace mips

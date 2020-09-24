@@ -1,5 +1,7 @@
 #include "random.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 //	Given a mean and a standard deviation, gaussian generates a normally 
 //		distributed random number.
@@ -49,3 +51,6 @@ float new_cdf(						// cdf of N(0, 1) in range [-x, x]
 	}
 	return result;
 }
+
+} // end namespace mips
+

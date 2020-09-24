@@ -14,6 +14,19 @@
 #include "sign_alsh.h"
 #include "simple_lsh.h"
 
+namespace mips {
+
+// -----------------------------------------------------------------------------
+int ground_truth(					// find the ground truth MIP results
+	int   n,							// number of data objects
+	int   qn,							// number of query points
+	int   d,							// dimensionality
+	const float **data,					// data objects
+	const float **norm_d,				// l2-norm of data objects
+	const float **query,				// query objects
+	const float **norm_q,				// l2-norm of query objects
+	const char  *truth_set);			// address of truth set
+	
 // -----------------------------------------------------------------------------
 int linear_scan(					// k-MIP search by linear scan
 	int   n,							// number of data objects
@@ -118,3 +131,5 @@ int h2_alsh(						// k-MIP search by h2_alsh
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
 	const Result **R);					// MIP ground truth results
+
+} // end namespace mips

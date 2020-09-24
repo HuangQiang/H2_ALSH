@@ -6,6 +6,8 @@
 
 #include "def.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 inline float uniform(				// r.v. from Uniform(min, max)
 	float min,							// min value
@@ -48,3 +50,5 @@ float normal_cdf(					// cdf of N(0, 1) in (-inf, x]
 float new_cdf(						// cdf of N(0, 1) in [-x, x]
 	float x,							// integral border
 	float step = 0.001f);				// step increment
+
+} // end namespace mips

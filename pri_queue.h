@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "def.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 //  struct Result
 // -----------------------------------------------------------------------------
@@ -116,3 +118,5 @@ private:
 	int num_;						// number of key current active
 	Result *list_;					// the list itself
 };
+
+} // end namespace mips

@@ -11,8 +11,7 @@
 #include "pri_queue.h"
 #include "qalsh.h"
 
-class QALSH;
-class MaxK_List;
+namespace mips {
 
 // -----------------------------------------------------------------------------
 //  XBox is used to solve the problem of c-Approximate Maximum Inner Product 
@@ -67,3 +66,5 @@ protected:
 	const float **norm_d_;			// l2-norm of data objects
 	QALSH *lsh_;					// qalsh
 };
+
+} // end namespace mips

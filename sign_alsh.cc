@@ -1,5 +1,7 @@
 #include "sign_alsh.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 Sign_ALSH::Sign_ALSH(				// constructor
 	int   n,							// number of data objects
@@ -123,3 +125,5 @@ int Sign_ALSH::kmip(				// c-k-AMIP search
 
 	return 0;
 }
+
+} // end namespace mips

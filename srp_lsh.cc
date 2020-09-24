@@ -1,5 +1,7 @@
 #include "srp_lsh.h"
 
+namespace mips {
+
 // -----------------------------------------------------------------------------
 SRP_LSH::SRP_LSH(					// constructor
 	int   n,							// cardinality of dataset
@@ -148,3 +150,5 @@ inline uint32_t SRP_LSH::table_lookup( // table lookup the match value
 	return table16_[x & 0xffff] + table16_[(x>>16) & 0xffff] + 
 		table16_[(x>>32) & 0xffff] + table16_[(x>>48) & 0xffff];
 }
+
+} // end namespace mips
