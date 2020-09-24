@@ -12,4 +12,4 @@ all: ${OBJS}
 	${CXX} ${CPPFLAGS} -o alsh ${OBJS}
 
 clean:
-	-rm ${OBJS}
+	-rm ${OBJS} alsh
