@@ -26,10 +26,10 @@ We use four real-life datasets [Sift](https://drive.google.com/open?id=1dAFbjQWo
 
 | Datasets | #Objects  | #Queries | Dimensionality | Data Size |
 | -------- | --------- | -------- | -------------- | --------- |
-| Sift     | 1,000,000 | 1,000    | 128            | 337.8 MB  |
-| Netflix  | 17,770    | 1,000    | 300            | 50.8 MB   |
-| Yahoo    | 624,961   | 1,000    | 300            | 2.3 GB    |
-| Gist     | 1,000,000 | 1,000    | 960            | 4.0 GB    |
+| Sift     | 1,000,000 | 1,000    | 128            | 512.0 MB  |
+| Netflix  | 17,770    | 1,000    | 300            | 21.3 MB   |
+| Yahoo    | 624,961   | 1,000    | 300            | 750.0 MB  |
+| Gist     | 1,000,000 | 1,000    | 960            | 3.8 GB    |
 
 ## Run Experiments
 
