@@ -1,5 +1,4 @@
-#ifndef __L2_ALSH2_H
-#define __L2_ALSH2_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -60,6 +59,15 @@ public:
 		const float *query,				// input query
 		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results (return) 
+	
+	// -------------------------------------------------------------------------
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += lsh_->get_memory_usage();
+		return ret;
+	}
 
 protected:
 	int   n_pts_;					// number of data objects
@@ -70,9 +78,5 @@ protected:
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
 	const float **norm_q_;			// l2-norm of query objects
-	// int   l2_alsh2_dim_;			// dim of l2_alsh2 data (dim_ + 2 * m_)
-	// float **l2_alsh2_data_;			// l2_alsh2 data
 	QALSH *lsh_;					// qalsh
 };
-
-#endif // __L2_ALSH2_H

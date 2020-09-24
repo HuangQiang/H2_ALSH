@@ -1,5 +1,4 @@
-#ifndef __XBOX_H
-#define __XBOX_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -51,6 +50,15 @@ public:
 		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results
 
+	// -------------------------------------------------------------------------
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += lsh_->get_memory_usage();
+		return ret;
+	}
+
 protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimensionality
@@ -59,5 +67,3 @@ protected:
 	const float **norm_d_;			// l2-norm of data objects
 	QALSH *lsh_;					// qalsh
 };
-
-#endif // __XBOX_H

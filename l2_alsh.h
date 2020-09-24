@@ -1,5 +1,4 @@
-#ifndef __L2_ALSH_H
-#define __L2_ALSH_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -24,8 +23,8 @@ class MaxK_List;
 //  (MIPS)", In Advances in Neural Information Processing Systems (NIPS), pages
 //  2321–2329, 2014.
 //  
-//  notice that to make a fair comparison with H2-ALSH, we apply QALSH for 
-//  ANN search after converting MIP search to NN search by L2_ALSH transformation.
+//  Notice that to make a fair comparison with H2-ALSH, we apply QALSH for ANN 
+//  search after converting MIP search to NN search by L2_ALSH transformation.
 // -----------------------------------------------------------------------------
 class L2_ALSH {
 public:
@@ -50,6 +49,15 @@ public:
 		const float *query,				// input query
 		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results (return) 
+	
+	// -------------------------------------------------------------------------
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += lsh_->get_memory_usage();
+		return ret;
+	}
 
 protected:
 	int   n_pts_;					// number of data objects
@@ -61,5 +69,3 @@ protected:
 	const float **norm_d_;			// l2-norm of data objects
 	QALSH *lsh_;					// qalsh
 };
-
-#endif // __L2_ALSH_H

@@ -1,5 +1,4 @@
-#ifndef __SIGN_ALSH_H
-#define __SIGN_ALSH_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -47,6 +46,15 @@ public:
 		const float *query,				// input query
 		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k mip results
+	
+	// -------------------------------------------------------------------------
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += lsh_->get_memory_usage();
+		return ret;
+	}
 
 protected:
 	int   n_pts_;					// number of data points
@@ -58,5 +66,3 @@ protected:
 	const float **norm_d_;			// l2-norm of data objects
 	SRP_LSH *lsh_;					// SRP_LSH
 };
-
-#endif // __SIGN_ALSH_H

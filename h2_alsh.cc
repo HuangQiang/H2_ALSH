@@ -9,20 +9,11 @@ H2_ALSH::H2_ALSH(					// constructor
 	float mip_ratio,					// approximation ratio for AMIP search
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
+	: n_pts_(n), dim_(d), ratio_(mip_ratio), data_(data), norm_d_(norm_d)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_pts_  = n;	
-	dim_    = d;
-	ratio_  = mip_ratio;
-	data_   = data;
-	norm_d_	= norm_d;
-
 	// -------------------------------------------------------------------------
 	//  sort data objects by their Euclidean norms under the ascending order
 	// -------------------------------------------------------------------------
-	g_memory += sizeof(Result) * n;
 	Result *order = new Result[n];
 	for (int i = 0; i < n; ++i) {
 		order[i].key_ = norm_d_[i][0];
@@ -30,7 +21,6 @@ H2_ALSH::H2_ALSH(					// constructor
 	}
 	qsort(order, n, sizeof(Result), ResultCompDesc);
 
-	g_memory += SIZEINT * n;
 	h2_alsh_id_ = new int[n];
 	for (int i = 0; i < n; ++i) h2_alsh_id_[i] = order[i].id_;
 
@@ -40,7 +30,6 @@ H2_ALSH::H2_ALSH(					// constructor
 	// -------------------------------------------------------------------------
 	//  divide datasets into blocks and build qalsh for each block
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * (d + 1);
 	float *h2_alsh_data = new float[d + 1];
 	int   start = 0;
 
@@ -88,27 +77,21 @@ H2_ALSH::H2_ALSH(					// constructor
 		blocks_.push_back(block);
 		start += cnt;
 	}
-	num_blocks_ = (int) blocks_.size();
 	assert(start == n);
 	
 	// -------------------------------------------------------------------------
 	//  release space
 	// -------------------------------------------------------------------------
-	delete[] order; order = NULL;
-	delete[] h2_alsh_data; h2_alsh_data = NULL;
-
-	g_memory -= sizeof(Result) * n;
-	g_memory -= SIZEFLOAT * (d + 1);
+	delete[] order;
+	delete[] h2_alsh_data;
 }
 
 // -----------------------------------------------------------------------------
 H2_ALSH::~H2_ALSH()					// destructor
 {
-	delete[] h2_alsh_id_; h2_alsh_id_ = NULL; 
-	g_memory -= SIZEINT * n_pts_;
-	
-	for (int i = 0; i < num_blocks_; ++i) {
-		delete blocks_[i]; blocks_[i] = NULL;
+	delete[] h2_alsh_id_; h2_alsh_id_ = NULL; 	
+	for (auto block : blocks_) {
+		delete block; block = NULL;
 	}
 	blocks_.clear(); blocks_.shrink_to_fit();
 }
@@ -121,7 +104,7 @@ void H2_ALSH::display()				// display parameters
 	printf("    d          = %d\n",   dim_);
 	printf("    c          = %.1f\n", ratio_);
 	printf("    M          = %f\n",   M_);
-	printf("    num_blocks = %d\n\n", num_blocks_);
+	printf("    num_blocks = %d\n\n", (int) blocks_.size());
 }
 
 // -----------------------------------------------------------------------------
@@ -142,8 +125,7 @@ int H2_ALSH::kmip(					// c-k-AMIP search
 	// -------------------------------------------------------------------------
 	//  c-k-AMIP search
 	// -------------------------------------------------------------------------
-	for (int i = 0; i < num_blocks_; ++i) {
-		Block *block = blocks_[i];
+	for (auto block : blocks_) {
 		int   *index = block->index_;
 		int   n      = block->n_pts_;
 		float M      = block->M_;

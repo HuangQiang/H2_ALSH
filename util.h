@@ -1,5 +1,4 @@
-#ifndef __UTIL_H
-#define __UTIL_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -20,13 +19,15 @@
 struct Result;
 class  MaxK_List;
 
-extern timeval  g_start_time;		// global parameter: start time
-extern timeval  g_end_time;			// global parameter: end time
+extern timeval g_start_time;		// global param: start time
+extern timeval g_end_time;			// global param: end time
 
-extern uint64_t g_memory;			// global parameter: memory usage
-extern float    g_runtime;			// global parameter: running time
-extern float    g_ratio;			// global parameter: overall ratio
-extern float    g_recall;			// global parameter: recall
+extern float   g_memory;			// global param: estimated memory usage
+extern float   g_indextime;			// global param: indexing time
+
+extern float   g_runtime;			// global param: running time
+extern float   g_ratio;				// global param: overall ratio
+extern float   g_recall;			// global param: recall
 
 // -----------------------------------------------------------------------------
 void create_dir(					// create dir if the path exists
@@ -55,6 +56,12 @@ int read_ground_truth(				// read ground truth results from disk
 	Result **R);						// ground truth results (return)
 
 // -----------------------------------------------------------------------------
+void write_pre_recall(				// write precision-recall curves to disk
+	FILE  *fp,							// file pointer
+	const float **pre,					// precision 
+	const float **recall);				// recall
+
+// -----------------------------------------------------------------------------
 float calc_inner_product(			// calc inner product
 	int   dim,							// dimension
 	const float *p1,					// 1st point
@@ -77,7 +84,7 @@ float calc_l2_sqr(					// calc L2 square distance
 	const float *p2);					// 2nd point
 
 // -----------------------------------------------------------------------------
-float calc_recall(					// calc recall (percentage)
+float calc_ratio(					// calc overall ratio
 	int   k,							// top-k value
 	const Result *R,					// ground truth results 
 	MaxK_List *list);					// results returned by algorithms
@@ -86,7 +93,7 @@ float calc_recall(					// calc recall (percentage)
 float calc_recall(					// calc recall (percentage)
 	int   k,							// top-k value
 	const Result *R,					// ground truth results 
-	const Result *result);				// MIP results
+	MaxK_List *list);					// results returned by algorithms
 
 // -----------------------------------------------------------------------------
 int get_hits(						// get the number of hits between two ID list
@@ -104,18 +111,6 @@ int norm_distribution(				// analyse norm distribution of data
 	const char  *out_path);				// output path
 
 // -----------------------------------------------------------------------------
-void k_mip_search(					// k-MIP search
-	int   n, 							// number of data objects
-	int   qn,							// number of query objects
-	int   d, 							// dimensionality
-	int   k,							// top-k value
-	const float **data,					// data objects
-	const float **norm_d,				// l2-norm of data objects
-	const float **query,				// query objects
-	const float **norm_q,				// l2-norm of query objects
-	Result **result);					// k-MIP results (return)
-
-// -----------------------------------------------------------------------------
 int ground_truth(					// find the ground truth MIP results
 	int   n,							// number of data objects
 	int   qn,							// number of query points
@@ -125,5 +120,3 @@ int ground_truth(					// find the ground truth MIP results
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
 	const char  *truth_set);			// address of truth set
-
-#endif // __UTIL_H

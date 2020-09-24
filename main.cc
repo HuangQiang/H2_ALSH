@@ -264,57 +264,64 @@ int main(int nargs, char **args)
 			(const float **) query, (const float **) norm_q, truth_set);
 		break;
 	case 1:
-		h2_alsh(n, qn, d, nn_ratio, mip_ratio, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		h2_alsh(n, qn, d, nn_ratio, mip_ratio, "h2_alsh", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 2:
-		l2_alsh(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		l2_alsh(n, qn, d, m, U, nn_ratio, "l2_alsh", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 3:
-		l2_alsh2(n, qn, d, m, U, nn_ratio, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		l2_alsh2(n, qn, d, m, U, nn_ratio, "l2_alsh2", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 4:
-		xbox(n, qn, d, nn_ratio, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		xbox(n, qn, d, nn_ratio, "xbox", "h2_alsh-", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 5:
-		sign_alsh(n, qn, d, K, m, U, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		sign_alsh(n, qn, d, K, m, U, "sign_alsh", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 6:
-		simple_lsh(n, qn, d, K, (const float **) data, 
-			(const float **) norm_d, (const float **) query, 
-			(const float **) norm_q, (const Result **) R, out_path);
+		simple_lsh(n, qn, d, K, "simple_lsh", out_path, 
+			(const float **) data, (const float **) norm_d, 
+			(const float **) query, (const float **) norm_q, 
+			(const Result **) R);
 		break;
 	case 7:
-		linear_scan(n, qn, d, (const float **) data, (const float **) norm_d,
+		linear_scan(n, qn, d, "linear_scan", out_path, 
+			(const float **) data, (const float **) norm_d, 
 			(const float **) query, (const float **) norm_q, 
-			(const Result **) R, out_path);
+			(const Result **) R);
 		break;
 	case 8:
 		h2_alsh_precision_recall(n, qn, d, nn_ratio, mip_ratio, pre, recall, 
-			(const float **) data,  (const float **) norm_d, 
-			(const float **) query, (const float **) norm_q,
-			(const Result **) R, out_path);
+			"h2_alsh", out_path, (const float **) data,  
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R);
 		break;
 	case 9:
 		sign_alsh_precision_recall(n, qn, d, K, m, U, pre, recall, 
-			(const float **) data,  (const float **) norm_d, 
-			(const float **) query, (const float **) norm_q,
-			(const Result **) R, out_path);
+			"sign_alsh", out_path, (const float **) data,  
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R);
 		break;
 	case 10:
 		simple_lsh_precision_recall(n, qn, d, K, pre, recall, 
-			(const float **) data,  (const float **) norm_d, 
-			(const float **) query, (const float **) norm_q,
-			(const Result **) R, out_path);
+			"simple_lsh", out_path, (const float **) data,  
+			(const float **) norm_d, (const float **) query, 
+			(const float **) norm_q, (const Result **) R);
 		break;
 	case 11:
 		norm_distribution(n, d, (const float **) data, (const float **) norm_d, 

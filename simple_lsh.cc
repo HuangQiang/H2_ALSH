@@ -7,15 +7,8 @@ Simple_LSH::Simple_LSH(				// constructor
 	int   K,							// number of hash tables
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
+	: n_pts_(n), dim_(d), data_(data), norm_d_(norm_d)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_pts_  = n;
-	dim_    = d;
-	data_   = data;
-	norm_d_ = norm_d;
-
 	// -------------------------------------------------------------------------
 	//  init srp_lsh
 	// -------------------------------------------------------------------------
@@ -25,7 +18,6 @@ Simple_LSH::Simple_LSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * n;
 	float *norm = new float[n];
 	float max_norm = MINREAL;
 	for (int i = 0; i < n; ++i) {
@@ -37,7 +29,6 @@ Simple_LSH::Simple_LSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for srp_lsh for new format of data
 	// -------------------------------------------------------------------------
-	g_memory += (SIZEBOOL * K + SIZEFLOAT * (d + 1));
 	bool  *hash_code = new bool[K];
 	float *simple_lsh_data = new float[d + 1];
 	for (int i = 0; i < n; ++i) {
@@ -57,18 +48,15 @@ Simple_LSH::Simple_LSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for qalsh for new format of data
 	// -------------------------------------------------------------------------
-	delete[] norm; norm = NULL;
-	delete[] hash_code; hash_code = NULL;
-	delete[] simple_lsh_data; simple_lsh_data = NULL;
-
-	g_memory -= SIZEFLOAT * n;
-	g_memory -= (SIZEBOOL * K + SIZEFLOAT * (d + 1));
+	delete[] norm; 
+	delete[] hash_code;
+	delete[] simple_lsh_data;
 }
 
 // -----------------------------------------------------------------------------
 Simple_LSH::~Simple_LSH()			// destructor
 {
-	delete lsh_; lsh_ = NULL;
+	if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; }
 }
 
 // -----------------------------------------------------------------------------
@@ -116,7 +104,7 @@ int Simple_LSH::kmip(				// c-k-AMIP search
 			query, norm_q);
 		kip = list->insert(ip, id + 1);
 	}
-	delete[] simple_lsh_query; simple_lsh_query = NULL;
+	delete[] simple_lsh_query;
 
 	return 0;
 }

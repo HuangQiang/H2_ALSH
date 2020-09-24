@@ -5,19 +5,13 @@ SRP_LSH::SRP_LSH(					// constructor
 	int   n,							// cardinality of dataset
 	int   d,							// dimensionality of dataset
 	int   K)							// number of hash tables
+	: n_(n), d_(d), K_(K)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_ = n;
-	d_ = d;
-	K_ = K;
 	m_ = (int) ceil(K / 64.0f);
 
 	// -------------------------------------------------------------------------
 	//  generate random projection vectors
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * K_ * d_;
 	proj_ = new float*[K];
 	for (int i = 0; i < K; ++i) {
 		proj_[i] = new float[d];
@@ -30,7 +24,6 @@ SRP_LSH::SRP_LSH(					// constructor
 	//  initialize lookup table for all uint16_t values
 	// -------------------------------------------------------------------------
 	int size = 1 << 16;
-	g_memory += SIZEINT * size;
 	table16_ = new uint32_t[size];
 	for (int i = 0; i < size; ++i) {
 		table16_[i] = bit_count(i);
@@ -39,17 +32,8 @@ SRP_LSH::SRP_LSH(					// constructor
 	// -------------------------------------------------------------------------
 	//  allocate space for hash_key
 	// -------------------------------------------------------------------------
-	g_memory += SIZEUINT64 * n_ * m_;
 	hash_key_ = new uint64_t*[n];
 	for (int i = 0; i < n; ++i) hash_key_[i] = new uint64_t[m_];
-}
-
-// -----------------------------------------------------------------------------
-inline uint32_t SRP_LSH::bit_count(	// count the number of 1 bits of x
-	uint32_t x) 						// input uint32_t value
-{
-    uint32_t num = x - ((x >> 1) & 033333333333) - ((x >> 2) & 011111111111);
-    return ((num + (num >> 3)) & 030707070707) % 63;
 }
 
 // -----------------------------------------------------------------------------
@@ -59,16 +43,21 @@ SRP_LSH::~SRP_LSH()					// destructor
 		delete[] proj_[i]; proj_[i] = NULL;
 	}
 	delete[] proj_;	proj_ = NULL; 
-	g_memory -= SIZEFLOAT * K_ * d_;
 
 	delete[] table16_; table16_ = NULL; 
-	g_memory -= SIZEINT * (1 << 16);
 	
 	for (int i = 0; i < n_; ++i) {
 		delete[] hash_key_[i]; hash_key_[i] = NULL;
 	}
-	delete[] hash_key_; hash_key_ = NULL; 
-	g_memory -= SIZEUINT64 * n_ * m_;
+	delete[] hash_key_; hash_key_ = NULL;
+}
+
+// -----------------------------------------------------------------------------
+inline uint32_t SRP_LSH::bit_count(	// count the number of 1 bits of x
+	uint32_t x) 						// input uint32_t value
+{
+    uint32_t num = x - ((x >> 1) & 033333333333) - ((x >> 2) & 011111111111);
+    return ((num + (num >> 3)) & 030707070707) % 63;
 }
 
 // -----------------------------------------------------------------------------

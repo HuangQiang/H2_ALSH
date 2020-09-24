@@ -1,5 +1,4 @@
-#ifndef __QALSH_H
-#define __QALSH_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -26,6 +25,16 @@ struct Result;
 // -----------------------------------------------------------------------------
 class QALSH {
 public:
+	int    n_;						// number of data objects
+	int    d_;						// dimensionality
+	float  ratio_;					// approximation ratio
+	float  w_;						// bucket width
+	int    m_;						// number of hash tables
+	int    l_;						// collision threshold
+	float  **a_;					// lsh functions
+	Result **tables_;				// hash tables
+
+	// -------------------------------------------------------------------------
 	QALSH(							// constructor
 		int   n,						// number of data objects
 		int   d,						// dimensionality
@@ -33,6 +42,10 @@ public:
 
 	// -------------------------------------------------------------------------
 	~QALSH();						// destructor
+
+	// -------------------------------------------------------------------------
+	float calc_p(					// calc probability
+		float x);						// x = w / (2.0 * r)
 
 	// -------------------------------------------------------------------------
 	float calc_hash_value(			// calc hash value
@@ -50,19 +63,12 @@ public:
 		std::vector<int> &cand);		// NN candidates (return)
 
 	// -------------------------------------------------------------------------
-	int    n_;						// number of data objects
-	int    d_;						// dimensionality
-	float  ratio_;					// approximation ratio
-	float  w_;						// bucket width
-	int    m_;						// number of hash tables
-	int    l_;						// collision threshold
-	float  **a_;					// lsh functions
-	Result **tables_;				// hash tables
-
-protected:
-	// -------------------------------------------------------------------------
-	float calc_p(					// calc probability
-		float x);						// x = w / (2.0 * r)
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += SIZEFLOAT * m_ * d_;	// for a_
+		ret += sizeof(Result) * m_ * n_; // for tables_
+		return ret;
+	}
 };
-
-#endif // __QALSH_H

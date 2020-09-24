@@ -9,17 +9,8 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	float U,							// scale factor for data
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
+	: n_pts_(n), dim_(d), m_(m), U_(U), data_(data), norm_d_(norm_d)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_pts_  = n;
-	dim_    = d;
-	m_      = m;
-	U_      = U;
-	data_   = data;
-	norm_d_ = norm_d;
-	
 	// -------------------------------------------------------------------------
 	//  init srp_lsh
 	// -------------------------------------------------------------------------
@@ -30,7 +21,6 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * n;
 	float *norm = new float[n];
 	M_ = MINREAL;
 	for (int i = 0; i < n; ++i) {
@@ -41,7 +31,6 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for srp_lsh for new format of data
 	// -------------------------------------------------------------------------
-	g_memory += (SIZEBOOL * K + SIZEFLOAT * sign_alsh_dim);
 	bool  *hash_code = new bool[K];
 	float *sign_alsh_data = new float[sign_alsh_dim];
 	float scale = U / M_;
@@ -70,18 +59,15 @@ Sign_ALSH::Sign_ALSH(				// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for qalsh for new format of data
 	// -------------------------------------------------------------------------
-	delete[] norm; norm = NULL;
-	delete[] hash_code; hash_code = NULL;
-	delete[] sign_alsh_data; sign_alsh_data = NULL;
-
-	g_memory -= SIZEFLOAT * n;
-	g_memory -= (SIZEBOOL * K + SIZEFLOAT * sign_alsh_dim);
+	delete[] norm;
+	delete[] hash_code;
+	delete[] sign_alsh_data;
 }
 
 // -----------------------------------------------------------------------------
 Sign_ALSH::~Sign_ALSH()				// destructor
 {
-	delete lsh_; lsh_ = NULL;
+	if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; }
 }
 
 // -----------------------------------------------------------------------------
@@ -133,7 +119,7 @@ int Sign_ALSH::kmip(				// c-k-AMIP search
 			query, norm_q);
 		kip = list->insert(ip, id + 1);
 	}
-	delete[] sign_alsh_query; sign_alsh_query = NULL;
+	delete[] sign_alsh_query;
 
 	return 0;
 }

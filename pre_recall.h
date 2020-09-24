@@ -1,5 +1,4 @@
-#ifndef __PRE_RECALL_H
-#define __PRE_RECALL_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -23,12 +22,14 @@ int h2_alsh_precision_recall(		// precision-recall curve of h2_alsh
 	float mip_ratio,					// approximation ratio for AMIP search
 	float **pre,						// precision 
 	float **recall,						// recall
+	const char *method_name,			// name of method
+	const char *out_path,				// output path
 	const float **data,					// data objects
 	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
-	const Result **R,					// MIP ground truth results
-	const char *out_path);				// output path
+	const Result **R);					// MIP ground truth results
+	
 
 // -----------------------------------------------------------------------------
 int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
@@ -40,12 +41,13 @@ int sign_alsh_precision_recall(		// precision-recall curve of sign_alsh
 	float U,							// param of sign_alsh
 	float **pre,						// precision 
 	float **recall,						// recall
+	const char *method_name,			// name of method
+	const char *out_path,				// output path
 	const float **data,					// data objects
 	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
-	const Result **R,					// MIP ground truth results
-	const char *out_path);				// output path
+	const Result **R);					// MIP ground truth results
 
 // -----------------------------------------------------------------------------
 int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
@@ -55,12 +57,10 @@ int simple_lsh_precision_recall(	// precision-recall curve of simple_lsh
 	int   K,							// number of hash tables
 	float **pre,						// precision 
 	float **recall,						// recall
+	const char *method_name,			// name of method
+	const char *out_path,				// output path
 	const float **data,					// data objects
 	const float **norm_d,				// l2-norm of data objects
 	const float **query,				// query objects
 	const float **norm_q,				// l2-norm of query objects
-	const Result **R,					// MIP ground truth results
-	const char *out_path);				// output path
-
-
-#endif // __PRE_RECALL_H
+	const Result **R);					// MIP ground truth results

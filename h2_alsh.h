@@ -1,5 +1,4 @@
-#ifndef __H2_ALSH_H
-#define __H2_ALSH_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -56,17 +55,28 @@ public:
 		const float *norm_q,			// l2-norm of query
 		MaxK_List *list);				// top-k MIP results (return) 
 
+	// -------------------------------------------------------------------------
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += SIZEINT * n_pts_; 	// for h2_alsh_id_
+		for (auto block : blocks_) { // for blocks_
+			ret += sizeof(*block);
+			if (block->lsh_ != NULL) ret += block->lsh_->get_memory_usage();
+		}
+		return ret;
+	}
+
 protected:
 	int   n_pts_;					// number of data objects
 	int   dim_;						// dimension of data objects
-	int   num_blocks_;				// number of blocks
 	float ratio_;					// approximation ratio for MIP
 	float b_;						// compression ratio
 	float M_;						// max norm of the data objects
 	const float **data_;			// original data objects
 	const float **norm_d_;			// l2-norm of data objects
+	
 	int   *h2_alsh_id_;				// data id after h2_alsh transformation
 	std::vector<Block*> blocks_;	// blocks
 };
-
-#endif // __H2_ALSH_H

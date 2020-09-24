@@ -1,5 +1,4 @@
-#ifndef __PRI_QUEUE_H
-#define __PRI_QUEUE_H
+#pragma once
 
 #include <algorithm>
 #include "def.h"
@@ -117,5 +116,3 @@ private:
 	int num_;						// number of key current active
 	Result *list_;					// the list itself
 };
-
-#endif // __PRI_QUEUE_H

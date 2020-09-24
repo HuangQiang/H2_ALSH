@@ -9,17 +9,8 @@ L2_ALSH::L2_ALSH(					// constructor
 	float nn_ratio,						// approximation ratio for ANN search
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
+	: n_pts_(n), dim_(d), m_(m), U_(U), data_(data), norm_d_(norm_d)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_pts_       = n;
-	dim_         = d;
-	m_           = m;
-	U_           = U;
-	data_        = data;
-	norm_d_      = norm_d;
-
 	// -------------------------------------------------------------------------
 	//  init qalsh
 	// -------------------------------------------------------------------------
@@ -30,7 +21,6 @@ L2_ALSH::L2_ALSH(					// constructor
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * n;
 	float *norm = new float[n];
 	M_ = MINREAL;
 	for (int i = 0; i < n; ++i) {
@@ -41,7 +31,6 @@ L2_ALSH::L2_ALSH(					// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for qalsh for new format of data
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * l2_alsh_dim;
 	float *l2_alsh_data = new float[l2_alsh_dim];
 	float scale    = U / M_;
 	int   exponent = -1;
@@ -68,21 +57,17 @@ L2_ALSH::L2_ALSH(					// constructor
 	for (int i = 0; i < lsh_m; ++i) {
 		qsort(lsh_->tables_[i], n, sizeof(Result), ResultComp);
 	}
-
 	// -------------------------------------------------------------------------
 	//  release space
 	// -------------------------------------------------------------------------
-	delete[] norm; norm = NULL;
-	delete[] l2_alsh_data; l2_alsh_data = NULL;
-
-	g_memory -= SIZEFLOAT * n;
-	g_memory -= SIZEFLOAT * l2_alsh_dim;
+	delete[] norm;
+	delete[] l2_alsh_data;
 }
 
 // -----------------------------------------------------------------------------
 L2_ALSH::~L2_ALSH()					// destructor
 {
-	delete lsh_; lsh_ = NULL;
+	if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; }
 }
 
 // -----------------------------------------------------------------------------
@@ -92,9 +77,9 @@ void L2_ALSH::display()				// display parameters
 	printf("    n  = %d\n",   n_pts_);
 	printf("    d  = %d\n",   dim_);
 	printf("    m  = %d\n",   m_);
+	printf("    c0 = %.1f\n", lsh_->ratio_);
 	printf("    U  = %.2f\n", U_);
-	printf("    M  = %f\n",   M_);
-	printf("\n");
+	printf("    M  = %f\n\n", M_);
 }
 
 // -----------------------------------------------------------------------------
@@ -136,7 +121,7 @@ int L2_ALSH::kmip(					// c-k-AMIP search
 			query, norm_q);
 		kip = list->insert(ip, id + 1);
 	}
-	delete[] l2_alsh_query; l2_alsh_query = NULL;
+	delete[] l2_alsh_query;
 
 	return 0;
 }

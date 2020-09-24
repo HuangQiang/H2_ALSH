@@ -7,15 +7,8 @@ XBox::XBox(							// constructor
 	float nn_ratio,						// approximation ratio for ANN search
 	const float **data, 				// input data
 	const float **norm_d)				// l2-norm of data objects
+	: n_pts_(n), dim_(d), data_(data), norm_d_(norm_d)
 {
-	// -------------------------------------------------------------------------
-	//  init parameters
-	// -------------------------------------------------------------------------
-	n_pts_  = n;
-	dim_    = d;
-	data_   = data;
-	norm_d_ = norm_d;
-
 	// -------------------------------------------------------------------------
 	//  init qalsh
 	// -------------------------------------------------------------------------
@@ -25,7 +18,6 @@ XBox::XBox(							// constructor
 	// -------------------------------------------------------------------------
 	//  calculate the Euclidean norm of data and find the maximum norm of data
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * n;
 	float *norm = new float[n];
 	float max_norm = MINREAL;
 	for (int i = 0; i < n; ++i) {
@@ -37,7 +29,6 @@ XBox::XBox(							// constructor
 	// -------------------------------------------------------------------------
 	//  build hash tables for qalsh for new format of data
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * (d + 1);
 	int   m = lsh_->m_;	
 	float *xbox_data = new float[d + 1];
 	for (int i = 0; i < n; ++i) {
@@ -60,27 +51,24 @@ XBox::XBox(							// constructor
 	// -------------------------------------------------------------------------
 	//  release space
 	// -------------------------------------------------------------------------
-	delete[] norm; norm = NULL;
-	delete[] xbox_data; xbox_data = NULL;
-
-	g_memory -= SIZEFLOAT * n;
-	g_memory -= SIZEFLOAT * (d + 1);
+	delete[] norm;
+	delete[] xbox_data;
 }
 
 // -----------------------------------------------------------------------------
 XBox::~XBox()						// destructor
 {
-	delete lsh_; lsh_ = NULL;
+	if (lsh_ != NULL) { delete lsh_; lsh_ = NULL; }
 }
 
 // -----------------------------------------------------------------------------
 void XBox::display()				// display parameters
 {
 	printf("Parameters of XBox:\n");
-	printf("    n  = %d\n", n_pts_);
-	printf("    d  = %d\n", dim_);
-	printf("    M  = %f\n", M_);
-	printf("\n");
+	printf("    n  = %d\n",   n_pts_);
+	printf("    d  = %d\n",   dim_);
+	printf("    c0 = %.1f\n", lsh_->ratio_);
+	printf("    M  = %f\n\n", M_);
 }
 
 // -----------------------------------------------------------------------------
@@ -96,8 +84,8 @@ int XBox::kmip(						// c-k-AMIP search
 	// -------------------------------------------------------------------------
 	float normq  = norm_q[0];
 	float lambda = used_new_transform ? M_ / normq : 1.0f;
-	float *xbox_query = new float[dim_ + 1];
 
+	float *xbox_query = new float[dim_ + 1];
 	for (int i = 0; i < dim_; ++i) {
 		xbox_query[i] = lambda * query[i];
 	}
@@ -123,7 +111,7 @@ int XBox::kmip(						// c-k-AMIP search
 			query, norm_q);
 		kip = list->insert(ip, id + 1);
 	}
-	delete[] xbox_query; xbox_query = NULL;
+	delete[] xbox_query;
 
 	return 0;
 }

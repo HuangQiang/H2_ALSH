@@ -1,5 +1,4 @@
-#ifndef __SRP_LSH_H
-#define __SRP_LSH_H
+#pragma once
 
 #include <iostream>
 #include <algorithm>
@@ -24,6 +23,15 @@ class MaxK_List;
 // -----------------------------------------------------------------------------
 class SRP_LSH {
 public:
+	int      n_;					// number of data objects
+	int      d_;					// dimensionality
+	int      K_;					// number of hash functions
+	int      m_;					// number of compressed uint64_t hash code
+	float    **proj_;				// random projection vectors
+	uint64_t **hash_key_;			// hash code of data objects
+	uint32_t *table16_;				// table to record the number of "1" bits
+
+	// -------------------------------------------------------------------------
 	SRP_LSH(						// constructor
 		int   n,						// number of data objects
 		int   d,						// dimensionality
@@ -52,13 +60,15 @@ public:
 		std::vector<int> &cand); 		// MCS candidates  (return)
 
 	// -------------------------------------------------------------------------
-	int      n_;					// number of data objects
-	int      d_;					// dimensionality
-	int      K_;					// number of hash functions
-	int      m_;					// number of compressed uint64_t hash code
-	float    **proj_;				// random projection vectors
-	uint64_t **hash_key_;			// hash code of data objects
-	uint32_t *table16_;				// table to record the number of "1" bits
+	int64_t get_memory_usage()		// get memory usage
+	{
+		int64_t ret = 0;
+		ret += sizeof(*this);
+		ret += SIZEFLOAT * K_ * d_;	// for proj
+		ret += SIZEINT * (1 << 16); // for table16_
+		ret += SIZEUINT64 * n_ * m_;; // for hash_key_
+		return ret;
+	}
 
 protected:
 	// -------------------------------------------------------------------------
@@ -69,5 +79,3 @@ protected:
 	uint32_t table_lookup(			// table lookup the match value
 		uint64_t x);					// input uint64_t value
 };
-
-#endif // __SRP_LSH_H

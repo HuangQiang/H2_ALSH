@@ -5,14 +5,12 @@ QALSH::QALSH(						// constructor
 	int   n,							// number of data objects
 	int   d,							// dimension of data objects
 	float ratio)						// approximation ratio
+	: n_(n), d_(d), ratio_(ratio)
 {
 	// -------------------------------------------------------------------------
 	//  init parameters
 	// -------------------------------------------------------------------------
-	n_     = n;
-	d_     = d;
-	ratio_ = ratio;
-	w_     = sqrt((8.0f * ratio * ratio * log(ratio)) / (ratio * ratio - 1.0f));
+	w_ = sqrt((8.0f * ratio * ratio * log(ratio)) / (ratio * ratio - 1.0f));
 	
 	float p1    = calc_p(w_ / 2.0f);
 	float p2    = calc_p(w_ / (2.0f * ratio));
@@ -31,7 +29,6 @@ QALSH::QALSH(						// constructor
 	// -------------------------------------------------------------------------
 	//  generate hash functions
 	// -------------------------------------------------------------------------
-	g_memory += SIZEFLOAT * m_ * d;
 	a_ = new float*[m_];
 	for (int i = 0; i < m_; ++i) { // chosen from N(0.0, 1.0)
 		a_[i] = new float[d];
@@ -43,7 +40,6 @@ QALSH::QALSH(						// constructor
 	// -------------------------------------------------------------------------
 	//  allocate space for hash tables
 	// -------------------------------------------------------------------------
-	g_memory += sizeof(Result) * m_ * n;
 	tables_ = new Result*[m_];
 	for (int i = 0; i < m_; ++i) tables_[i] = new Result[n];
 }
@@ -64,9 +60,6 @@ QALSH::~QALSH()						// destructor
 	}
 	delete[] a_; a_ = NULL;
 	delete[] tables_; tables_ = NULL;
-
-	g_memory -= SIZEFLOAT * m_ * d_;
-	g_memory -= sizeof(Result) * m_ * n_;
 }
 
 // -----------------------------------------------------------------------------
