@@ -1,6 +1,6 @@
 #!/bin/bash
-make
 make clean
+make -j
 
 qn=1000
 dataPath=./data

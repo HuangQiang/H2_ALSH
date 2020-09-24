@@ -11,33 +11,5 @@ CPPFLAGS=-w -O3
 all: ${OBJS}
 	${CXX} ${CPPFLAGS} -o alsh ${OBJS}
 
-random.o: random.h
-
-pri_queue.o: pri_queue.h
-
-util.o: util.h
-
-qalsh.o: qalsh.h
-
-srp_lsh.o: srp_lsh.h
-
-l2_alsh.o: l2_alsh.h
-
-l2_alsh2.o: l2_alsh2.h
-
-xbox.o: xbox.h
-
-simple_lsh.o: simple_lsh.h
-
-sign_alsh.o: sign_alsh.h
-
-h2_alsh.o: h2_alsh.h
-
-amips.o: amips.h
-
-pre_recall.o: pre_recall.h 
-
-main.o:
-
 clean:
 	-rm ${OBJS}
