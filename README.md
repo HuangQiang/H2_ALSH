@@ -15,9 +15,9 @@ ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining, pages
 The package requires ```g++``` with ```c++11``` support. To download and compile the code, type:
 
 ```bash
-$ git clone https://github.com/HuangQiang/H2_ALSH.git
-$ cd H2_ALSH
-$ make
+git clone https://github.com/HuangQiang/H2_ALSH.git
+cd H2_ALSH
+make
 ```
 
 ## Datasets
