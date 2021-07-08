@@ -16,8 +16,8 @@ U1=0.83
 U2=0.85
 c0=2.0
 c=0.5
-dPath=./data/${dname}/${dname}
-oPath=./results/${dname}/
+dPath=../data/${dname}/${dname}
+oPath=../results/${dname}/
 
 # # ------------------------------------------------------------------------------
 # #  Ground-Truth

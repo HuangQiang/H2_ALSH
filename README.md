@@ -1,4 +1,6 @@
-# H2_ALSH
+# H2_ALSH: Homocentric Hypersphere Asymmetric Locality-Sensitive Hashing
+
+<p align="center"><img src="imgs/h2-alsh.jpg" alt="drawing" width="750"/></p>
 
 ## Introduction
 
@@ -15,7 +17,7 @@ ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining, pages
 The package requires ```g++``` with ```c++11``` support. To download and compile the code, type:
 
 ```bash
-git clone https://github.com/HuangQiang/H2_ALSH.git
+git clone git@github.com/HuangQiang/H2_ALSH.git
 cd H2_ALSH
 make
 ```

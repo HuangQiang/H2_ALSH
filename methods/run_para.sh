@@ -3,8 +3,8 @@ make clean
 make -j
 
 qn=1000
-dataPath=./data
-resultPath=./results
+dataPath=../data
+resultPath=../results
 
 # ------------------------------------------------------------------------------
 #  Tuning approximation ratio c for c-AMIP search
